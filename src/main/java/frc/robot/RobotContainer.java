@@ -5,10 +5,16 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AutoBalancingCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.GripperSubsystem;
+import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
@@ -23,24 +29,69 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
+  private final GripperSubsystem m_gripper = new GripperSubsystem();
+  private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();// A simple auto routine that drives forward a specified distance, and then stops.
 
+
+  // ADIS Gyro
+  public ADIS16470_IMU gyro = new ADIS16470_IMU();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_secondaryDriverController =
       new CommandXboxController(OperatorConstants.kSecondaryDriverControllerPort);
   private final CommandJoystick m_driverJoystick =
       new CommandJoystick(OperatorConstants.kDriverControllerPort);
 
+  //MAKE COMMANDS HERE!!
+  // wip
+  private final Command m_simpleAuto = new AutoBalancingCommand(m_driveSubsystem, gyro);
+  // wip
+  private final Command m_complexAuto = new RunCommand(()->{});
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
     m_driveSubsystem.setDefaultCommand(new RunCommand(()->{
-      m_driveSubsystem.driveArcade(m_driverJoystick.getY() *adjustThrottle(m_driverJoystick.getThrottle()), m_driverJoystick.getX());
+      m_driveSubsystem.driveArcade(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()), -m_driverJoystick.getTwist());
     }, //TODO: Rotation throttle?
     m_driveSubsystem));
-  }
 
+    
+
+    // A chooser for autonomous commands
+    SendableChooser<Command> m_autochooser0 = new SendableChooser<>();
+    SendableChooser<Command> m_autochooser1 = new SendableChooser<>();
+    SendableChooser<Command> m_autochooser2 = new SendableChooser<>();
+    SendableChooser<Command> m_autochooser3 = new SendableChooser<>();
+
+    // Add commands to the autonomous command chooser
+    m_autochooser0.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser0.addOption("Move Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser0.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser0.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+
+    m_autochooser1.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser1.addOption("Move Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+
+    m_autochooser2.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser2.addOption("Move Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+
+    m_autochooser3.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser3.addOption("Move Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+
+    // Put the chooser on the dashboard
+    SmartDashboard.putData(m_autochooser0);
+    SmartDashboard.putData(m_autochooser1);
+    SmartDashboard.putData(m_autochooser2);
+    SmartDashboard.putData(m_autochooser3);
+
+  }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
@@ -62,10 +113,22 @@ public class RobotContainer {
     //m_driverJoystick.(new RunCommand(()->{
       //m_driveSubsystem.driveArcade(m_driverJoystick.getLeftY(), m_driverJoystick.getLeftX());
     //}, m_driveSubsystem));
+
+     //set up gripper open/close (WILL NOT RUN UNLESS SWITCHED OUT FOR JOYSTICK)
+    //  new JoystickButton(m_driveController, XboxController.Button.kRightBumper.value)
+    //  .onTrue(new InstantCommand(() -> m_gripper.openGripper()))
+    //  .onFalse(new InstantCommand(() -> m_gripper.closeGripper()));
   }
 
   private double adjustThrottle(double throttle) {
     return throttle/2 +.5;
+  }
+
+  public double getGyroReading() {
+    gyro.getAngle();
+    gyro.getXComplementaryAngle();
+    gyro.getYComplementaryAngle();
+    return 0.0;
   }
 
   /**

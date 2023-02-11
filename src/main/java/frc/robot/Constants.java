@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.lib.PIDGains;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,13 +17,29 @@ package frc.robot;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
-    public static final int kSecondaryDriverControllerPort = 0;
+    public static final int kSecondaryDriverControllerPort = 1;
     
   }
+  //Used in Balancing 
+  public static final int autoConst = 20;
+
   public static class MotorConstants {
+    //Used in DriveSubsystem
     public static final int kFLSparkMax = 0;
     public static final int kFRSparkMax = 1;
     public static final int kBLSparkMax = 2;
     public static final int kBRSparkMax = 3;
+    //Used in ArmSubsystem
+    public static final int kLARMSparkMax = 0;
+    public static final int kRARMSparkMax = 1;
+    public static final int kWRISTSparkMax = 2;
+    //Used in GripperSubsystem
+    public static final int kGRIPSparkMax = 1;
+  }
+  public static final class Gripper {
+    public static final double kClosePosition = 0.0; //subject to change
+    public static final double kOpenPosition = -34.0; //subject to change
+    public static final double kSafePosition = -29.0; //subject to change
+    public static final PIDGains kPositionPIDGains = new PIDGains(0.2, 0.0, 0.0);
   }
 }

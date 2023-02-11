@@ -7,37 +7,17 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
-import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.MotorConstants;
 
-public class DriveSubsystem extends SubsystemBase {
-  // Declares physical parts
-  private CANSparkMax FLneo = new CANSparkMax(MotorConstants.kFLSparkMax, MotorType.kBrushless);
-  private CANSparkMax FRneo = new CANSparkMax(MotorConstants.kFRSparkMax, MotorType.kBrushless);
-  private CANSparkMax BLneo = new CANSparkMax(MotorConstants.kBLSparkMax, MotorType.kBrushless);
-  private CANSparkMax BRneo = new CANSparkMax(MotorConstants.kBRSparkMax, MotorType.kBrushless);
-  private MotorControllerGroup LeftMotorGroup = new MotorControllerGroup(FLneo, BLneo);
-  private MotorControllerGroup RightMotorGroup = new MotorControllerGroup(FRneo, BRneo);
-  private DifferentialDrive differentialDrive = new DifferentialDrive(LeftMotorGroup, RightMotorGroup);
-
-  /*private Spark LMotors = new Spark(1);
-  private Spark RMotors = new Spark(0);
-  private DifferentialDrive differentialDrive = new DifferentialDrive(LMotors, RMotors);*/
+public class ArmSubsystem extends SubsystemBase {
+  private CANSparkMax LARMneo = new CANSparkMax(MotorConstants.kLARMSparkMax, MotorType.kBrushless);
+  private CANSparkMax RARMneo = new CANSparkMax(MotorConstants.kRARMSparkMax, MotorType.kBrushless);
+  private CANSparkMax WRISTneo = new CANSparkMax(MotorConstants.kWRISTSparkMax, MotorType.kBrushless);
 
   /** Creates a new ExampleSubsystem. */
-  public DriveSubsystem() {
-    RightMotorGroup.setInverted(true);
-    //RMotors.setInverted(true);
-  }
-
-  public void driveArcade(double xspeed, double zrot) {
-    differentialDrive.arcadeDrive(xspeed, zrot);
-  }
+  public ArmSubsystem() {}
 
   /**
    * Example command factory method.
@@ -45,15 +25,18 @@ public class DriveSubsystem extends SubsystemBase {
    * @return a command
    */
   public CommandBase exampleMethodCommand() {
+
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
-    
     return runOnce(
         () -> {
           /* one-time action goes here */
         });
   }
 
+  public void testMethod() {
+    
+  }
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
