@@ -4,28 +4,32 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
+
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.PneumaticConstants;
 
-public class GripperSubsystem extends SubsystemBase {
-  //not sure if we need this..
-  private Compressor pcmCompressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-  
-  Solenoid gripSolenoidPCM = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+// Aaron was here :D
+
+public class ArmElevatorSubsystem extends SubsystemBase {
+
+  DoubleSolenoid elevatorLDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PneumaticConstants.kLforward, PneumaticConstants.kLreverse);
+  DoubleSolenoid elevatorRDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PneumaticConstants.kRforward, PneumaticConstants.kRreverse);
 
   /** Creates a new ExampleSubsystem. */
-  public GripperSubsystem() {
-    pcmCompressor.enableDigital();
-  }
+  public ArmElevatorSubsystem() {}
 
-  public void openGripper() {
-    gripSolenoidPCM.set(true);
+  public void Extend() {
+    elevatorLDoublePCM.set(kForward);
+    elevatorRDoublePCM.set(kForward);
   }
-  public void closeGripper() {
-    gripSolenoidPCM.set(false);
+  public void Retract() {
+    elevatorLDoublePCM.set(kReverse);
+    elevatorRDoublePCM.set(kReverse);
   }
 
   /**
@@ -39,8 +43,9 @@ public class GripperSubsystem extends SubsystemBase {
     return runOnce(
         () -> {
           /* one-time action goes here */
-        });
+        }); 
   }
+
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
@@ -52,7 +57,8 @@ public class GripperSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() { // This method will be called once per scheduler run
+  public void periodic() {
+    // This method will be called once per scheduler run
   }
 
   @Override

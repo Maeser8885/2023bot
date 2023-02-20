@@ -6,6 +6,8 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoBalancingCommand;
+import frc.robot.commands.AutoDriveCommand;
+import frc.robot.commands.AutoDropoffCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DriveSubsystem;
@@ -17,6 +19,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -29,8 +33,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final GripperSubsystem m_gripper = new GripperSubsystem();
-  private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();// A simple auto routine that drives forward a specified distance, and then stops.
+  public final GripperSubsystem m_gripper = new GripperSubsystem();
+  public final DriveSubsystem m_driveSubsystem = new DriveSubsystem();// A simple auto routine that drives forward a specified distance, and then stops.
 
 
   // ADIS Gyro
@@ -42,54 +46,66 @@ public class RobotContainer {
       new CommandJoystick(OperatorConstants.kDriverControllerPort);
 
   //MAKE COMMANDS HERE!!
-  // wip
-  private final Command m_simpleAuto = new AutoBalancingCommand(m_driveSubsystem, gyro);
-  // wip
+  // Once on the Charging Station, it balances hopefully.
+  private final Command m_balanceAuto = new AutoBalancingCommand(m_driveSubsystem, gyro);
+  // Literally just waits there, menacingly.
+  private final Command m_waitAuto = new WaitCommand(3);
+  // Moves the robot a set ammount.
+  private final Command m_moveAuto = new AutoDriveCommand(m_driveSubsystem);
+  // Moves the robot to Scoring Area, drops the game piece.
+  private final Command m_dropoffAuto = new AutoDropoffCommand(m_gripper);
+  // placeholder command
   private final Command m_complexAuto = new RunCommand(()->{});
+
+  
+  SendableChooser<Command> m_autochooser0 = new SendableChooser<>();
+  SendableChooser<Command> m_autochooser1 = new SendableChooser<>();
+  SendableChooser<Command> m_autochooser2 = new SendableChooser<>();
+  SendableChooser<Command> m_autochooser3 = new SendableChooser<>();
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
     m_driveSubsystem.setDefaultCommand(new RunCommand(()->{
-      m_driveSubsystem.driveArcade(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()), -m_driverJoystick.getTwist());
+      m_driveSubsystem.driveArcade(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()), -m_driverJoystick.getTwist()*adjustThrottle(-m_driverJoystick.getThrottle()));
     }, //TODO: Rotation throttle?
     m_driveSubsystem));
+    /*m_driveSubsystem.setDefaultCommand(new RunCommand(()->{
+      m_driveSubsystem.driveArcade(-m_driverJoystick.getY(), -m_driverJoystick.getTwist());
+    }, //TODO: Rotation throttle?
+    m_driveSubsystem));*/
 
-    
+    // Aaron was here :D
 
     // A chooser for autonomous commands
-    SendableChooser<Command> m_autochooser0 = new SendableChooser<>();
-    SendableChooser<Command> m_autochooser1 = new SendableChooser<>();
-    SendableChooser<Command> m_autochooser2 = new SendableChooser<>();
-    SendableChooser<Command> m_autochooser3 = new SendableChooser<>();
 
     // Add commands to the autonomous command chooser
-    m_autochooser0.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser0.addOption("Move Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser0.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser0.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser0.addOption("Wait Auto", m_waitAuto);
+    m_autochooser0.addOption("Dropoff Auto", m_dropoffAuto); 
+    m_autochooser0.addOption("Move Auto", m_moveAuto);
+    m_autochooser0.addOption("Balance Auto", m_balanceAuto);
 
-    m_autochooser1.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser1.addOption("Move Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser1.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser1.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
 
-    m_autochooser2.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser2.addOption("Move Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser2.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser2.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
 
-    m_autochooser3.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser3.addOption("Move Auto", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
-    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACUTAL COMMAND
+    m_autochooser3.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser3.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
 
     // Put the chooser on the dashboard
-    SmartDashboard.putData(m_autochooser0);
-    SmartDashboard.putData(m_autochooser1);
-    SmartDashboard.putData(m_autochooser2);
-    SmartDashboard.putData(m_autochooser3);
+    SmartDashboard.putData("test0", m_autochooser0);
+    SmartDashboard.putData("test1", m_autochooser1);
+    SmartDashboard.putData("test2", m_autochooser2);
+    SmartDashboard.putData("test3", m_autochooser3);
 
   }
   /**
@@ -138,6 +154,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return new SequentialCommandGroup(this.m_autochooser0.getSelected(), this.m_autochooser1.getSelected(), this.m_autochooser2.getSelected(), this.m_autochooser3.getSelected());
   }
 }

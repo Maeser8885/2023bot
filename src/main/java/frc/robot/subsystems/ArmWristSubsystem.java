@@ -4,30 +4,26 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Solenoid;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.MotorConstants;
 
-public class GripperSubsystem extends SubsystemBase {
-  //not sure if we need this..
-  private Compressor pcmCompressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
-  
-  Solenoid gripSolenoidPCM = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+public class ArmWristSubsystem extends SubsystemBase {
+
+  private CANSparkMax WRISTneo = new CANSparkMax(MotorConstants.kWRISTSparkMax, MotorType.kBrushless);
 
   /** Creates a new ExampleSubsystem. */
-  public GripperSubsystem() {
-    pcmCompressor.enableDigital();
-  }
+  public ArmWristSubsystem() {}
 
-  public void openGripper() {
-    gripSolenoidPCM.set(true);
-  }
-  public void closeGripper() {
-    gripSolenoidPCM.set(false);
-  }
+  public void changePointRotation() {
 
+  }
+  public void setPointRotation() {
+
+  }
   /**
    * Example command factory method.
    *
@@ -41,6 +37,7 @@ public class GripperSubsystem extends SubsystemBase {
           /* one-time action goes here */
         });
   }
+
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
@@ -52,7 +49,8 @@ public class GripperSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() { // This method will be called once per scheduler run
+  public void periodic() {
+    // This method will be called once per scheduler run
   }
 
   @Override

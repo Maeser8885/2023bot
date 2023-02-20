@@ -4,20 +4,17 @@
 
 package frc.robot.subsystems;
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.MotorConstants;
 
-public class ArmSubsystem extends SubsystemBase {
-  private CANSparkMax LARMneo = new CANSparkMax(MotorConstants.kLARMSparkMax, MotorType.kBrushless);
-  private CANSparkMax RARMneo = new CANSparkMax(MotorConstants.kRARMSparkMax, MotorType.kBrushless);
-  private CANSparkMax WRISTneo = new CANSparkMax(MotorConstants.kWRISTSparkMax, MotorType.kBrushless);
+public class CompressorSubsystem extends SubsystemBase {
+
+  public Compressor armCompressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
 
   /** Creates a new ExampleSubsystem. */
-  public ArmSubsystem() {}
+  public CompressorSubsystem() {}
 
   /**
    * Example command factory method.
@@ -25,7 +22,6 @@ public class ArmSubsystem extends SubsystemBase {
    * @return a command
    */
   public CommandBase exampleMethodCommand() {
-
     // Inline construction of command goes here.
     // Subsystem::RunOnce implicitly requires `this` subsystem.
     return runOnce(
@@ -34,9 +30,6 @@ public class ArmSubsystem extends SubsystemBase {
         });
   }
 
-  public void testMethod() {
-    
-  }
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *

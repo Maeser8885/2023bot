@@ -10,10 +10,12 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.MotorConstants;
+
+// Aaron was here :D
 
 public class DriveSubsystem extends SubsystemBase {
   // Declares physical parts
@@ -23,15 +25,18 @@ public class DriveSubsystem extends SubsystemBase {
   private CANSparkMax BRneo = new CANSparkMax(MotorConstants.kBRSparkMax, MotorType.kBrushless);
   private MotorControllerGroup LeftMotorGroup = new MotorControllerGroup(FLneo, BLneo);
   private MotorControllerGroup RightMotorGroup = new MotorControllerGroup(FRneo, BRneo);
-  private DifferentialDrive differentialDrive = new DifferentialDrive(LeftMotorGroup, RightMotorGroup);
-
+  private DifferentialDrive differentialDrive;
   /*private Spark LMotors = new Spark(1);
-  private Spark RMotors = new Spark(0);
-  private DifferentialDrive differentialDrive = new DifferentialDrive(LMotors, RMotors);*/
+  private Spark RMotors = new Spark(0);*/
+  //private DifferentialDrive differentialDrive = new DifferentialDrive(FLneo, FRneo);
+
+
 
   /** Creates a new ExampleSubsystem. */
   public DriveSubsystem() {
     RightMotorGroup.setInverted(true);
+    //BRneo.setInverted(true);
+    differentialDrive = new DifferentialDrive(LeftMotorGroup, RightMotorGroup);
     //RMotors.setInverted(true);
   }
 
@@ -67,7 +72,12 @@ public class DriveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("FL", FLneo.get());
+    SmartDashboard.putNumber("FR", FRneo.get());
+    SmartDashboard.putNumber("BL", BLneo.get());
+    SmartDashboard.putNumber("BR", BRneo.get());
   }
+
 
   @Override
   public void simulationPeriodic() {

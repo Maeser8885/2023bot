@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.GenericEntry;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -17,7 +21,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-
+  //private ShuffleboardTab tab = Shuffleboard.getTab("test");
+  //private GenericEntry toRun;
   private RobotContainer m_robotContainer;
 
   /**
@@ -29,6 +34,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+   // toRun = tab.add("toRun", false).getEntry();
   }
 
   /**
@@ -99,6 +105,9 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("accelx", m_robotContainer.gyro.getAccelX());
     SmartDashboard.putNumber("accely", m_robotContainer.gyro.getAccelY());
     SmartDashboard.putNumber("accelz", m_robotContainer.gyro.getAccelZ());
+    /*if (toRun.getBoolean(false)){
+      m_robotContainer.m_driveSubsystem.driveArcade(0.5, 0);
+    }*/
   }
 
   /** This function is called once when the robot is first started up. */
