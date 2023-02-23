@@ -14,6 +14,8 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -56,7 +58,7 @@ public class RobotContainer {
   private final Command m_dropoffAuto = new AutoDropoffCommand(m_gripper);
   // placeholder command
   private final Command m_complexAuto = new RunCommand(()->{});
-
+  private final Solenoid fake;
   
   SendableChooser<Command> m_autochooser0 = new SendableChooser<>();
   SendableChooser<Command> m_autochooser1 = new SendableChooser<>();
@@ -65,6 +67,7 @@ public class RobotContainer {
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    fake = new Solenoid(PneumaticsModuleType.CTREPCM, 0);
     // Configure the trigger bindings
     configureBindings();
     m_driveSubsystem.setDefaultCommand(new RunCommand(()->{

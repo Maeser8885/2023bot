@@ -23,9 +23,10 @@ public final class Constants {
   }
   //Used in Balancing 
   public static final int autoConst = 20;
+  public static final int PCMCan = 6;
 
   public static class MotorConstants {
-    // Used in DriveSubsystem
+    // Used in DriveSubsystem,,..,.
     public static final int kFLSparkMax = 4;
     public static final int kFRSparkMax = 2;
     public static final int kBLSparkMax = 3;
