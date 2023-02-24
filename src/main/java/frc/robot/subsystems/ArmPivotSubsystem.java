@@ -11,6 +11,8 @@ import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxRelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.PIDGains;
@@ -28,24 +30,61 @@ public class ArmPivotSubsystem extends SubsystemBase {
 
   private double m_setpoint;
   private double m_prevSetpoint;
-  private SparkMaxPIDController m_Lcontroller;
-  private SparkMaxPIDController m_Rcontroller;
+  private SparkMaxPIDController m_controller;
+
+  private TrapezoidProfile m_profile;
+  private Timer m_timer;
+  
+  private TrapezoidProfile.State targetState;
+  private double feedforward;
+  private double manualValue;
 
   /** Creates a new ExampleSubsystem. */
   public ArmPivotSubsystem() {
-    m_RPIVOTneo.follow(m_LPIVOTneo);
+
+    m_RPIVOTneo.follow(m_LPIVOTneo, true);
+  
 
     m_encoder = m_LPIVOTneo.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+    m_encoder.setPositionConversionFactor(Constants.ArmPivot.kPositionFactor);
+    m_encoder.setVelocityConversionFactor(Constants.ArmPivot.kVelocityFactor);
 
-    m_Lcontroller = m_LPIVOTneo.getPIDController();
-    PIDGains.setSparkMaxGains(m_Lcontroller, Constants.Gripper.kPositionPIDGains);
+    m_setpoint = Constants.ArmPivot.kHomePosition;
+
+    m_controller = m_LPIVOTneo.getPIDController();
+    PIDGains.setSparkMaxGains(m_controller, Constants.ArmPivot.kPositionPIDGains);
+ 
+    m_setpoint = Constants.ArmPivot.kHomePosition;
+
+    m_timer = new Timer();
+    m_timer.start();
+    m_timer.reset();
+
+    updateMotionProfile();
   }
 
-  public void changePointRotation() {
-
+  public void setTargetPosition(double _setpoint, GripperSubsystem _gripper) {
+    if (_setpoint != m_setpoint) {
+      m_setpoint = _setpoint;
+      updateMotionProfile();
+    }
   }
-  public void setPointRotation() {
 
+  private void updateMotionProfile() {
+    TrapezoidProfile.State state = new TrapezoidProfile.State(m_encoder.getPosition(), m_encoder.getVelocity());
+    TrapezoidProfile.State goal = new TrapezoidProfile.State(m_setpoint, 0.0);
+    m_profile = new TrapezoidProfile(Constants.ArmPivot.kArmMotionConstraint, goal, state);
+    m_timer.reset();
+  }
+  public void runManual(double _power) {
+    //reset and zero out a bunch of automatic mode stuff so exiting manual mode happens cleanly and passively
+    m_setpoint = m_encoder.getPosition();
+    targetState = new TrapezoidProfile.State(m_setpoint, 0.0);
+    m_profile = new TrapezoidProfile(Constants.ArmPivot.kArmMotionConstraint, targetState, targetState);
+    //update the feedforward variable with the newly zero target velocity
+    feedforward = Constants.ArmPivot.kArmFeedforward.calculate(m_encoder.getPosition()+Constants.ArmPivot.kArmZeroCosineOffset, targetState.velocity);
+    m_LPIVOTneo.set(_power + (feedforward / 12.0));
+    manualValue = _power;
   }
 
   /**
