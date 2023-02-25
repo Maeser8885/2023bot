@@ -43,6 +43,9 @@ public class DriveSubsystem extends SubsystemBase {
   public void driveArcade(double xspeed, double zrot) {
     differentialDrive.arcadeDrive(xspeed, zrot);
   }
+  public void driveCurvature(double xspeed, double zrot, boolean turnInPlace) {
+    differentialDrive.curvatureDrive(xspeed, zrot, turnInPlace);
+  }
 
   /**
    * Example command factory method.

@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoBalancingCommand;
 import frc.robot.commands.AutoDriveCommand;
@@ -19,10 +20,6 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -47,6 +44,9 @@ public class RobotContainer {
   private final CommandJoystick m_driverJoystick =
       new CommandJoystick(OperatorConstants.kDriverControllerPort);
 
+  private final Trigger switchDriveButton =
+          m_driverJoystick.button(7);
+
   //MAKE COMMANDS HERE!!
   // Once on the Charging Station, it balances hopefully.
   private final Command m_balanceAuto = new AutoBalancingCommand(m_driveSubsystem, gyro);
@@ -64,16 +64,36 @@ public class RobotContainer {
   SendableChooser<Command> m_autochooser1 = new SendableChooser<>();
   SendableChooser<Command> m_autochooser2 = new SendableChooser<>();
   SendableChooser<Command> m_autochooser3 = new SendableChooser<>();
-  
+
+  SendableChooser<RunCommand> m_drivechooser = new SendableChooser<>();
+
+  private final RunCommand defaultDriveCommand = new RunCommand(()->{
+    m_driveSubsystem.driveArcade(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()),
+            -m_driverJoystick.getTwist()*adjustThrottle(-m_driverJoystick.getThrottle()));
+  }, m_driveSubsystem);
+
+  private final RunCommand richardDriveCommand = new RunCommand(()->{
+    m_driveSubsystem.driveArcade(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()),
+            -m_driverJoystick.getX()*adjustThrottle(-m_driverJoystick.getThrottle()));
+  }, m_driveSubsystem);
+
+  private final RunCommand curvatureDriveCommand = new RunCommand(()->{
+    m_driveSubsystem.driveCurvature(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()),
+            -m_driverJoystick.getX(), m_driverJoystick.button(11).getAsBoolean());
+  }, m_driveSubsystem);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     fake = new Solenoid(PneumaticsModuleType.CTREPCM, 0);
     // Configure the trigger bindings
     configureBindings();
-    m_driveSubsystem.setDefaultCommand(new RunCommand(()->{
-      m_driveSubsystem.driveArcade(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()), -m_driverJoystick.getTwist()*adjustThrottle(-m_driverJoystick.getThrottle()));
-    }, //TODO: Rotation throttle?
-    m_driveSubsystem));
+
+    defaultDriveCommand.setName("defaultDrive");
+    richardDriveCommand.setName("richard");
+    curvatureDriveCommand.setName("curvature");
+
+    m_driveSubsystem.setDefaultCommand(defaultDriveCommand);
+
     /*m_driveSubsystem.setDefaultCommand(new RunCommand(()->{
       m_driveSubsystem.driveArcade(-m_driverJoystick.getY(), -m_driverJoystick.getTwist());
     }, //TODO: Rotation throttle?
@@ -110,6 +130,12 @@ public class RobotContainer {
     SmartDashboard.putData("test2", m_autochooser2);
     SmartDashboard.putData("test3", m_autochooser3);
 
+    m_drivechooser.addOption("Twist Turn (default)",defaultDriveCommand);
+    m_drivechooser.addOption("Arcade Turn (richard)", richardDriveCommand);
+    m_drivechooser.addOption("Curvature Drive", curvatureDriveCommand);
+
+    SmartDashboard.putData("Control Setup", m_drivechooser);
+
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -137,6 +163,13 @@ public class RobotContainer {
     //  new JoystickButton(m_driveController, XboxController.Button.kRightBumper.value)
     //  .onTrue(new InstantCommand(() -> m_gripper.openGripper()))
     //  .onFalse(new InstantCommand(() -> m_gripper.closeGripper()));
+
+    switchDriveButton.onTrue(new InstantCommand(()->{
+      CommandScheduler.getInstance().cancel(m_driveSubsystem.getDefaultCommand());
+      this.m_driveSubsystem.setDefaultCommand(this.m_drivechooser.getSelected());
+      System.out.println(this.m_drivechooser.getSelected().getName());
+    }));
+    System.out.println("Configured Button Bindings");
   }
 
   private double adjustThrottle(double throttle) {
