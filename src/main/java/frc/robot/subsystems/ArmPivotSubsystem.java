@@ -34,7 +34,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
 
   private TrapezoidProfile m_profile;
   private Timer m_timer;
-  
+
   private TrapezoidProfile.State targetState;
   private double feedforward;
   private double manualValue;
@@ -48,8 +48,6 @@ public class ArmPivotSubsystem extends SubsystemBase {
     m_encoder = m_LPIVOTneo.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     m_encoder.setPositionConversionFactor(Constants.ArmPivot.kPositionFactor);
     m_encoder.setVelocityConversionFactor(Constants.ArmPivot.kVelocityFactor);
-
-    m_setpoint = Constants.ArmPivot.kHomePosition;
 
     m_controller = m_LPIVOTneo.getPIDController();
     PIDGains.setSparkMaxGains(m_controller, Constants.ArmPivot.kPositionPIDGains);

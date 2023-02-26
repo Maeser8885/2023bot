@@ -5,14 +5,14 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.*;
+import frc.robot.Constants.ArmPivot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoBalancingCommand;
 import frc.robot.commands.AutoDriveCommand;
 import frc.robot.commands.AutoDropoffCommand;
 import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
+import frc.robot.subsystems.ArmPivotSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -33,19 +33,27 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final GripperSubsystem m_gripper = new GripperSubsystem();
-  public final DriveSubsystem m_driveSubsystem = new DriveSubsystem();// A simple auto routine that drives forward a specified distance, and then stops.
-
+  public final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
+  public final ArmPivotSubsystem m_armPivot = new ArmPivotSubsystem();
 
   // ADIS Gyro
   public ADIS16470_IMU gyro = new ADIS16470_IMU();
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_secondaryDriverController =
       new CommandXboxController(OperatorConstants.kSecondaryDriverControllerPort);
   private final CommandJoystick m_driverJoystick =
       new CommandJoystick(OperatorConstants.kDriverControllerPort);
 
+  // Triggers!
   private final Trigger switchDriveButton =
-          m_driverJoystick.button(7);
+    m_driverJoystick.button(7);
+  private final Trigger gripperButton =
+    m_secondaryDriverController.x();
+  private final Trigger lowScoringButton =
+    m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
+  private final Trigger highScoringButton =
+    m_secondaryDriverController.a();
 
   //MAKE COMMANDS HERE!!
   // Once on the Charging Station, it balances hopefully.
@@ -87,6 +95,7 @@ public class RobotContainer {
     fake = new Solenoid(PneumaticsModuleType.CTREPCM, 0);
     // Configure the trigger bindings
     configureBindings();
+    setupDashboard();
 
     defaultDriveCommand.setName("defaultDrive");
     richardDriveCommand.setName("richard");
@@ -100,42 +109,6 @@ public class RobotContainer {
     m_driveSubsystem));*/
 
     // Aaron was here :D
-
-    // A chooser for autonomous commands
-
-    // Add commands to the autonomous command chooser
-    m_autochooser0.addOption("Wait Auto", m_waitAuto);
-    m_autochooser0.addOption("Dropoff Auto", m_dropoffAuto); 
-    m_autochooser0.addOption("Move Auto", m_moveAuto);
-    m_autochooser0.addOption("Balance Auto", m_balanceAuto);
-
-    m_autochooser1.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser1.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
-
-    m_autochooser2.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser2.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
-
-    m_autochooser3.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser3.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
-    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
-
-    // Put the chooser on the dashboard
-    SmartDashboard.putData("test0", m_autochooser0);
-    SmartDashboard.putData("test1", m_autochooser1);
-    SmartDashboard.putData("test2", m_autochooser2);
-    SmartDashboard.putData("test3", m_autochooser3);
-
-    m_drivechooser.addOption("Twist Turn (default)",defaultDriveCommand);
-    m_drivechooser.addOption("Arcade Turn (richard)", richardDriveCommand);
-    m_drivechooser.addOption("Curvature Drive", curvatureDriveCommand);
-
-    SmartDashboard.putData("Control Setup", m_drivechooser);
-
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -170,8 +143,47 @@ public class RobotContainer {
       System.out.println(this.m_drivechooser.getSelected().getName());
     }));
     System.out.println("Configured Button Bindings");
-  }
 
+    gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper));
+    //highScoringButton.onTrue(new InstantCommand(m_armPivot.setTargetPosition(ArmPivot.kScoringPosition, m_gripper);))
+
+ }
+  private void setupDashboard(){
+    // A chooser for autonomous commands
+    // Add commands to the autonomous command chooser
+    m_autochooser0.addOption("Wait Auto", m_waitAuto);
+    m_autochooser0.addOption("Dropoff Auto", m_dropoffAuto); 
+    m_autochooser0.addOption("Move Auto", m_moveAuto);
+    m_autochooser0.addOption("Balance Auto", m_balanceAuto);
+
+    m_autochooser1.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser1.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser1.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+
+    m_autochooser2.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser2.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser2.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+
+    m_autochooser3.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser3.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+    m_autochooser3.addOption("", m_complexAuto); //placeholder for ACTUAL COMMAND
+
+    // Put the chooser on the dashboard
+    SmartDashboard.putData("test0", m_autochooser0);
+    SmartDashboard.putData("test1", m_autochooser1);
+    SmartDashboard.putData("test2", m_autochooser2);
+    SmartDashboard.putData("test3", m_autochooser3);
+
+    m_drivechooser.addOption("Twist Turn (default)",defaultDriveCommand);
+    m_drivechooser.addOption("Arcade Turn (richard)", richardDriveCommand);
+    m_drivechooser.addOption("Curvature Drive", curvatureDriveCommand);
+
+    SmartDashboard.putData("Control Setup", m_drivechooser);
+
+  }
   private double adjustThrottle(double throttle) {
     return throttle/2 +.5;
   }

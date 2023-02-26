@@ -42,8 +42,6 @@ public class ArmWristSubsystem extends SubsystemBase {
     m_encoder.setPositionConversionFactor(Constants.ArmWrist.kPositionFactor);
     m_encoder.setVelocityConversionFactor(Constants.ArmWrist.kVelocityFactor);
 
-    m_setpoint = Constants.ArmPivot.kHomePosition;
-
     m_controller = m_WRISTneo.getPIDController();
     PIDGains.setSparkMaxGains(m_controller, Constants.ArmWrist.kPositionPIDGains);
 

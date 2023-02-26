@@ -7,25 +7,30 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class GripperSubsystem extends SubsystemBase {
-  //not sure if we need this..
-  private Compressor pcmCompressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
   
   Solenoid gripSolenoidPCM = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+  private boolean gripperState = false; // opened = false, closed = true
 
   /** Creates a new ExampleSubsystem. */
   public GripperSubsystem() {
-    pcmCompressor.enableDigital();
   }
 
   public void openGripper() {
-    gripSolenoidPCM.set(true);
+    gripSolenoidPCM.set(false);
+    gripperState = false;
   }
   public void closeGripper() {
-    gripSolenoidPCM.set(false);
+    gripSolenoidPCM.set(true);
+    gripperState = true;
+  }
+  public void toggleGripper() {
+    gripperState = !gripperState;
+    gripSolenoidPCM.set(gripperState);
   }
 
   /**
@@ -53,6 +58,7 @@ public class GripperSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() { // This method will be called once per scheduler run
+    SmartDashboard.putBoolean("Gripper Open State" , !gripperState);
   }
 
   @Override
