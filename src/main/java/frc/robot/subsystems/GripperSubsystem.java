@@ -19,7 +19,7 @@ public class GripperSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   public GripperSubsystem() {
   }
-
+   
   public void openGripper() {
     gripSolenoidPCM.set(false);
     gripperState = false;
@@ -27,7 +27,7 @@ public class GripperSubsystem extends SubsystemBase {
   public void closeGripper() {
     gripSolenoidPCM.set(true);
     gripperState = true;
-  }
+  } 
   public void toggleGripper() {
     gripperState = !gripperState;
     gripSolenoidPCM.set(gripperState);

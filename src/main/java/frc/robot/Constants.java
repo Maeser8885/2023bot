@@ -23,7 +23,7 @@ public final class Constants {
     public static final int kSecondaryDriverControllerPort = 1;
     
   }
-  //Used in Balancing 
+  // Used in Balancing 
   public static final int autoConst = 20;
   public static final int PCMCan = 6;
 
@@ -41,6 +41,9 @@ public final class Constants {
     // Used in GripperSubsystem
     public static final int kGRIPSparkMax = 13;
   }
+  public static class BindingConstants {
+    public static final int switchDrive = 7;
+  }
   public static class ArmPivot { //Subject to Change.
     public static final PIDGains kPositionPIDGains = new PIDGains(0.2, 0.0, 0.0);
 
@@ -54,9 +57,11 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints kArmMotionConstraint = new TrapezoidProfile.Constraints(2.0, 2.0);
 
     public static final double kHomePosition = 0.0;
-    public static final double kScoringPosition = 3.05;
+    public static final double kHighScoringPosition = 3.05;
+    public static final double kLowScoringPosition = 3.05;
     public static final double kIntakePosition = 4.52;
-    public static final double kFeederPosition = 2.95;
+    public static final double kHighIntakePosition = 2.95;
+    //public static final double kFeederPosition = 2.95; Was this for high intake?? Oh well.
   }
   public static class ArmWrist { //Subject to Change.
     public static final PIDGains kPositionPIDGains = new PIDGains(0.2, 0.0, 0.0);
@@ -81,5 +86,8 @@ public final class Constants {
     public static final int kLreverse = 2;
     public static final int kRforward = 3;
     public static final int kRreverse = 4;
+  }
+  public static class AutoConstants {
+    public static final double kAutoDriveDistanceInches = 5;
   }
 }

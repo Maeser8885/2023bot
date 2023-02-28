@@ -6,11 +6,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.ArmPivot;
+import frc.robot.Constants.BindingConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoBalancingCommand;
-import frc.robot.commands.AutoDriveCommand;
 import frc.robot.commands.AutoDropoffCommand;
 import frc.robot.commands.Autos;
+import frc.robot.commands.DriveDistance;
 import frc.robot.subsystems.ArmPivotSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
@@ -47,23 +48,29 @@ public class RobotContainer {
 
   // Triggers!
   private final Trigger switchDriveButton =
-    m_driverJoystick.button(7);
+    m_driverJoystick.button(BindingConstants.switchDrive);
   private final Trigger gripperButton =
-    m_secondaryDriverController.x();
+    m_secondaryDriverController.rightTrigger().and(m_secondaryDriverController.leftTrigger());
   private final Trigger lowScoringButton =
     m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
   private final Trigger highScoringButton =
     m_secondaryDriverController.a();
+  private final Trigger highIntakeButton =
+    m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.b());
+  private final Trigger IntakeButton =
+    m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.y());
+  private final Trigger HomeButton =
+    m_secondaryDriverController.leftBumper().and(m_secondaryDriverController.x());
 
-  //MAKE COMMANDS HERE!!
+  // MAKE COMMANDS HERE!!
   // Once on the Charging Station, it balances hopefully.
-  private final Command m_balanceAuto = new AutoBalancingCommand(m_driveSubsystem, gyro);
+  private final Command balanceAuto = new AutoBalancingCommand(m_driveSubsystem, gyro);
   // Literally just waits there, menacingly.
-  private final Command m_waitAuto = new WaitCommand(3);
+  private final Command waitAuto = new WaitCommand(3);
   // Moves the robot a set ammount.
-  private final Command m_moveAuto = new AutoDriveCommand(m_driveSubsystem);
+  private final Command moveAuto = new DriveDistance(1, 2, m_driveSubsystem); 
   // Moves the robot to Scoring Area, drops the game piece.
-  private final Command m_dropoffAuto = new AutoDropoffCommand(m_gripper);
+  private final Command dropoffAuto = new AutoDropoffCommand(m_gripper);
   // placeholder command
   private final Command m_complexAuto = new RunCommand(()->{});
   private final Solenoid fake;
@@ -137,6 +144,7 @@ public class RobotContainer {
     //  .onTrue(new InstantCommand(() -> m_gripper.openGripper()))
     //  .onFalse(new InstantCommand(() -> m_gripper.closeGripper()));
 
+    // Button Configuring!!
     switchDriveButton.onTrue(new InstantCommand(()->{
       CommandScheduler.getInstance().cancel(m_driveSubsystem.getDefaultCommand());
       this.m_driveSubsystem.setDefaultCommand(this.m_drivechooser.getSelected());
@@ -145,16 +153,20 @@ public class RobotContainer {
     System.out.println("Configured Button Bindings");
 
     gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper));
-    //highScoringButton.onTrue(new InstantCommand(m_armPivot.setTargetPosition(ArmPivot.kScoringPosition, m_gripper);))
+    highScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighScoringPosition, m_gripper);}));
+    lowScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kLowScoringPosition, m_gripper);}));
+    highIntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighIntakePosition, m_gripper);}));
+    IntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kIntakePosition, m_gripper);}));
+    HomeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHomePosition, m_gripper);}));
 
  }
   private void setupDashboard(){
     // A chooser for autonomous commands
     // Add commands to the autonomous command chooser
-    m_autochooser0.addOption("Wait Auto", m_waitAuto);
-    m_autochooser0.addOption("Dropoff Auto", m_dropoffAuto); 
-    m_autochooser0.addOption("Move Auto", m_moveAuto);
-    m_autochooser0.addOption("Balance Auto", m_balanceAuto);
+    m_autochooser0.addOption("Wait Auto", m_complexAuto);
+    m_autochooser0.addOption("Dropoff Auto", m_complexAuto);
+    m_autochooser0.addOption("Move Auto", m_complexAuto);
+    m_autochooser0.addOption("Balance Auto", m_complexAuto);
 
     m_autochooser1.addOption("Dropoff Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
     m_autochooser1.addOption("Move Auto", m_complexAuto); //placeholder for ACTUAL COMMAND
