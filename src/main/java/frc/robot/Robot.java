@@ -4,11 +4,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.networktables.GenericEntry;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -33,7 +29,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    m_robotContainer = RobotContainer.getInstance();
    // toRun = tab.add("toRun", false).getEntry();
   }
 
@@ -99,12 +95,12 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {
-    SmartDashboard.putNumber("yaw", m_robotContainer.gyro.getAngle());
-    SmartDashboard.putNumber("pitch", m_robotContainer.gyro.getXComplementaryAngle());
-    SmartDashboard.putNumber("roll", m_robotContainer.gyro.getYComplementaryAngle());
-    SmartDashboard.putNumber("accelx", m_robotContainer.gyro.getAccelX());
-    SmartDashboard.putNumber("accely", m_robotContainer.gyro.getAccelY());
-    SmartDashboard.putNumber("accelz", m_robotContainer.gyro.getAccelZ());
+    SmartDashboard.putNumber("yaw", m_robotContainer.m_gyro.getAngle());
+    SmartDashboard.putNumber("pitch", m_robotContainer.m_gyro.getXComplementaryAngle());
+    SmartDashboard.putNumber("roll", m_robotContainer.m_gyro.getYComplementaryAngle());
+    SmartDashboard.putNumber("accelx", m_robotContainer.m_gyro.getAccelX());
+    SmartDashboard.putNumber("accely", m_robotContainer.m_gyro.getAccelY());
+    SmartDashboard.putNumber("accelz", m_robotContainer.m_gyro.getAccelZ());
     /*if (toRun.getBoolean(false)){
       m_robotContainer.m_driveSubsystem.driveArcade(0.5, 0);
     }*/

@@ -27,6 +27,8 @@ public final class Constants {
   public static final int autoConst = 20;
   public static final int PCMCan = 6;
 
+  public static final int wheelDiameter = 6;
+
   public static class MotorConstants {
     // Used in DriveSubsystem,,..,.
     public static final int kFLSparkMax = 4;

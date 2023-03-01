@@ -6,22 +6,15 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.ArmPivot;
-import frc.robot.Constants.BindingConstants;
-import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.AutoBalancingCommand;
-import frc.robot.commands.AutoDropoffCommand;
-import frc.robot.commands.Autos;
-import frc.robot.commands.DriveDistance;
+import frc.robot.commands.Commands;
 import frc.robot.subsystems.ArmPivotSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -32,47 +25,27 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
+  private static RobotContainer instance;
+
+  public static synchronized RobotContainer getInstance(){
+    if (instance == null){
+      instance = new RobotContainer();
+    }
+    return instance;
+  }
+
   // The robot's subsystems and commands are defined here...
   public final GripperSubsystem m_gripper = new GripperSubsystem();
   public final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
   public final ArmPivotSubsystem m_armPivot = new ArmPivotSubsystem();
 
   // ADIS Gyro
-  public ADIS16470_IMU gyro = new ADIS16470_IMU();
+  public ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_secondaryDriverController =
-      new CommandXboxController(OperatorConstants.kSecondaryDriverControllerPort);
-  private final CommandJoystick m_driverJoystick =
-      new CommandJoystick(OperatorConstants.kDriverControllerPort);
+  public Controls m_controls = Controls.getInstance();
 
-  // Triggers!
-  private final Trigger switchDriveButton =
-    m_driverJoystick.button(BindingConstants.switchDrive);
-  private final Trigger gripperButton =
-    m_secondaryDriverController.rightTrigger().and(m_secondaryDriverController.leftTrigger());
-  private final Trigger lowScoringButton =
-    m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
-  private final Trigger highScoringButton =
-    m_secondaryDriverController.a();
-  private final Trigger highIntakeButton =
-    m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.b());
-  private final Trigger IntakeButton =
-    m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.y());
-  private final Trigger HomeButton =
-    m_secondaryDriverController.leftBumper().and(m_secondaryDriverController.x());
 
-  // MAKE COMMANDS HERE!!
-  // Once on the Charging Station, it balances hopefully.
-  private final Command balanceAuto = new AutoBalancingCommand(m_driveSubsystem, gyro);
-  // Literally just waits there, menacingly.
-  private final Command waitAuto = new WaitCommand(3);
-  // Moves the robot a set ammount.
-  private final Command moveAuto = new DriveDistance(1, 2, m_driveSubsystem); 
-  // Moves the robot to Scoring Area, drops the game piece.
-  private final Command dropoffAuto = new AutoDropoffCommand(m_gripper);
-  // placeholder command
-  private final Command m_complexAuto = new RunCommand(()->{});
   private final Solenoid fake;
   
   SendableChooser<Command> m_autochooser0 = new SendableChooser<>();
@@ -83,18 +56,15 @@ public class RobotContainer {
   SendableChooser<RunCommand> m_drivechooser = new SendableChooser<>();
 
   private final RunCommand defaultDriveCommand = new RunCommand(()->{
-    m_driveSubsystem.driveArcade(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()),
-            -m_driverJoystick.getTwist()*adjustThrottle(-m_driverJoystick.getThrottle()));
+    m_driveSubsystem.driveArcade(-m_controls.getThrottledY(), m_controls.getThrottledTwist());
   }, m_driveSubsystem);
 
   private final RunCommand richardDriveCommand = new RunCommand(()->{
-    m_driveSubsystem.driveArcade(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()),
-            -m_driverJoystick.getX()*adjustThrottle(-m_driverJoystick.getThrottle()));
+    m_driveSubsystem.driveArcade(-m_controls.getThrottledY(), m_controls.getThrottledX());
   }, m_driveSubsystem);
 
   private final RunCommand curvatureDriveCommand = new RunCommand(()->{
-    m_driveSubsystem.driveCurvature(-m_driverJoystick.getY() *adjustThrottle(-m_driverJoystick.getThrottle()),
-            -m_driverJoystick.getX(), m_driverJoystick.button(11).getAsBoolean());
+    m_driveSubsystem.driveCurvature(-m_controls.getThrottledY(), m_controls.getThrottledTwist(), m_controls.m_driverJoystick.button(11).getAsBoolean());
   }, m_driveSubsystem);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -145,25 +115,25 @@ public class RobotContainer {
     //  .onFalse(new InstantCommand(() -> m_gripper.closeGripper()));
 
     // Button Configuring!!
-    switchDriveButton.onTrue(new InstantCommand(()->{
+    m_controls.switchDriveButton.onTrue(new InstantCommand(()->{
       CommandScheduler.getInstance().cancel(m_driveSubsystem.getDefaultCommand());
       this.m_driveSubsystem.setDefaultCommand(this.m_drivechooser.getSelected());
       System.out.println(this.m_drivechooser.getSelected().getName());
     }));
     System.out.println("Configured Button Bindings");
 
-    gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper));
-    highScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighScoringPosition, m_gripper);}));
-    lowScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kLowScoringPosition, m_gripper);}));
-    highIntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighIntakePosition, m_gripper);}));
-    IntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kIntakePosition, m_gripper);}));
-    HomeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHomePosition, m_gripper);}));
+    m_controls.gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper));
+    m_controls.highScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighScoringPosition, m_gripper);}));
+    m_controls.lowScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kLowScoringPosition, m_gripper);}));
+    m_controls.highIntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighIntakePosition, m_gripper);}));
+    m_controls.IntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kIntakePosition, m_gripper);}));
+    m_controls.HomeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHomePosition, m_gripper);}));
 
  }
   private void setupDashboard(){
     // A chooser for autonomous commands
     // Add commands to the autonomous command chooser
-    m_autochooser0.addOption("Wait Auto", m_complexAuto);
+    /*m_autochooser0.addOption("Wait Auto", m_complexAuto);
     m_autochooser0.addOption("Dropoff Auto", m_complexAuto);
     m_autochooser0.addOption("Move Auto", m_complexAuto);
     m_autochooser0.addOption("Balance Auto", m_complexAuto);
@@ -193,17 +163,15 @@ public class RobotContainer {
     m_drivechooser.addOption("Arcade Turn (richard)", richardDriveCommand);
     m_drivechooser.addOption("Curvature Drive", curvatureDriveCommand);
 
-    SmartDashboard.putData("Control Setup", m_drivechooser);
+    SmartDashboard.putData("Control Setup", m_drivechooser);*/
 
   }
-  private double adjustThrottle(double throttle) {
-    return throttle/2 +.5;
-  }
+
 
   public double getGyroReading() {
-    gyro.getAngle();
-    gyro.getXComplementaryAngle();
-    gyro.getYComplementaryAngle();
+    m_gyro.getAngle();
+    m_gyro.getXComplementaryAngle();
+    m_gyro.getYComplementaryAngle();
     return 0.0;
   }
 

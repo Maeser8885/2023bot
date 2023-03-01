@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
@@ -26,6 +27,13 @@ public class DriveSubsystem extends SubsystemBase {
   private MotorControllerGroup LeftMotorGroup = new MotorControllerGroup(FLneo, BLneo);
   private MotorControllerGroup RightMotorGroup = new MotorControllerGroup(FRneo, BRneo);
   private DifferentialDrive differentialDrive;
+
+  private RelativeEncoder FLEncoder;
+  private RelativeEncoder FREncoder;
+  private RelativeEncoder BLEncoder;
+  private RelativeEncoder BREncoder;
+
+  private RelativeEncoder[] m_encoders = {FLEncoder,FREncoder,BLEncoder,BREncoder};
   /*private Spark LMotors = new Spark(1);
   private Spark RMotors = new Spark(0);*/
   //private DifferentialDrive differentialDrive = new DifferentialDrive(FLneo, FRneo);
@@ -34,6 +42,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Creates a new ExampleSubsystem. */
   public DriveSubsystem() {
+
     RightMotorGroup.setInverted(true);
     //BRneo.setInverted(true);
     differentialDrive = new DifferentialDrive(LeftMotorGroup, RightMotorGroup);
@@ -45,6 +54,11 @@ public class DriveSubsystem extends SubsystemBase {
   }
   public void driveCurvature(double xspeed, double zrot, boolean turnInPlace) {
     differentialDrive.curvatureDrive(xspeed, zrot, turnInPlace);
+  }
+  public void resetEncoders(){
+    for (RelativeEncoder encoder: m_encoders){
+      encoder.setPosition(0); //TODO FINISH THIS
+    }
   }
 
   /**
