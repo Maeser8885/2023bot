@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -14,6 +15,7 @@ public class Controls {
         }
         return instance;
     }
+    //public boolean m_debounce;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     public final CommandXboxController m_secondaryDriverController =
@@ -36,6 +38,8 @@ public class Controls {
             m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.y());
     public final Trigger HomeButton =
             m_secondaryDriverController.leftBumper().and(m_secondaryDriverController.x());
+    public final Trigger WristPivotStick =
+            m_secondaryDriverController.leftStick();
 
     public double getThrottledY(){
         return m_driverJoystick.getY() * adjustThrottle(m_driverJoystick.getThrottle());
@@ -53,5 +57,12 @@ public class Controls {
     private double adjustThrottle(double throttle) {
         return throttle/2 +.5;
     }
+
+    /*public int leftJoystickFlick() {
+        if (m_debounce) return 0;
+        if (m_secondaryDriverController.getLeftY() < 120) return 0;
+        //stuff
+        return Integer.signum((int)m_secondaryDriverController.getLeftY());
+    }*/
 
 }

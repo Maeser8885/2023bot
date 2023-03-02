@@ -61,6 +61,10 @@ public class DriveSubsystem extends SubsystemBase {
     }
   }
 
+  public double getAverageEncoders(){
+    return FLEncoder.getPosition() + FREncoder.getPosition() + BLEncoder.getPosition() + BREncoder.getPosition() / 4;
+  }
+
   /**
    * Example command factory method.
    *

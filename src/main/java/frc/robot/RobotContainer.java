@@ -10,6 +10,7 @@ import frc.robot.commands.Commands;
 import frc.robot.subsystems.ArmPivotSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -86,6 +87,8 @@ public class RobotContainer {
     m_driveSubsystem));*/
 
     // Aaron was here :D
+
+    CameraServer.startAutomaticCapture();
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
