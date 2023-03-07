@@ -7,9 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.ArmPivot;
 import frc.robot.commands.Commands;
-import frc.robot.subsystems.ArmPivotSubsystem;
-import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.GripperSubsystem;
+import frc.robot.commands.DriveTimedCommand;
+import frc.robot.subsystems.*;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -39,7 +38,11 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final GripperSubsystem m_gripper = new GripperSubsystem();
   public final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
-  public final ArmPivotSubsystem m_armPivot = new ArmPivotSubsystem();
+  public final ArmPivotSubsystem m_armPivot=null;// = new ArmPivotSubsystem();
+  public final DumbArmPivotSubsystem m_dumbPivot = new DumbArmPivotSubsystem();
+
+  public final DumbArmWristSubsystem m_dumbWrist = new DumbArmWristSubsystem();
+  public final ArmElevatorSubsystem m_elevator = new ArmElevatorSubsystem();
 
   // ADIS Gyro
   public ADIS16470_IMU m_gyro = new ADIS16470_IMU();
@@ -47,17 +50,17 @@ public class RobotContainer {
   public Controls m_controls = Controls.getInstance();
 
 
-  private final Solenoid fake;
+  //private final Solenoid fake;
   
-  SendableChooser<Command> m_autochooser0 = new SendableChooser<>();
-  SendableChooser<Command> m_autochooser1 = new SendableChooser<>();
-  SendableChooser<Command> m_autochooser2 = new SendableChooser<>();
-  SendableChooser<Command> m_autochooser3 = new SendableChooser<>();
+  SendableChooser<Command> m_autoChooser = new SendableChooser<>();
+  //SendableChooser<Command> m_autochooser1 = new SendableChooser<>();
+  //SendableChooser<Command> m_autochooser2 = new SendableChooser<>();
+  //SendableChooser<Command> m_autochooser3 = new SendableChooser<>();
 
   SendableChooser<RunCommand> m_drivechooser = new SendableChooser<>();
 
   private final RunCommand defaultDriveCommand = new RunCommand(()->{
-    m_driveSubsystem.driveArcade(-m_controls.getThrottledY(), m_controls.getThrottledTwist());
+    m_driveSubsystem.driveArcade(-m_controls.getThrottledY(), -m_controls.getThrottledTwist());
   }, m_driveSubsystem);
 
   private final RunCommand richardDriveCommand = new RunCommand(()->{
@@ -70,7 +73,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    fake = new Solenoid(PneumaticsModuleType.CTREPCM, 0);
+    //fake = new Solenoid(PneumaticsModuleType.CTREPCM, 7);
     // Configure the trigger bindings
     configureBindings();
     setupDashboard();
@@ -80,14 +83,14 @@ public class RobotContainer {
     curvatureDriveCommand.setName("curvature");
 
     m_driveSubsystem.setDefaultCommand(defaultDriveCommand);
-
+    m_dumbPivot.setDefaultCommand(new RunCommand(() -> m_dumbPivot.changePos(m_controls.deadband(m_controls.m_secondaryDriverController.getLeftY())*-0.5),m_dumbPivot));
+    m_dumbWrist.setDefaultCommand(new RunCommand(() -> m_dumbWrist.changePosition(m_controls.deadband(m_controls.m_secondaryDriverController.getRightY())*0.5),m_dumbWrist));
     /*m_driveSubsystem.setDefaultCommand(new RunCommand(()->{
       m_driveSubsystem.driveArcade(-m_driverJoystick.getY(), -m_driverJoystick.getTwist());
     }, //TODO: Rotation throttle?
     m_driveSubsystem));*/
 
     // Aaron was here :D
-
     CameraServer.startAutomaticCapture();
   }
   /**
@@ -123,19 +126,38 @@ public class RobotContainer {
       this.m_driveSubsystem.setDefaultCommand(this.m_drivechooser.getSelected());
       System.out.println(this.m_drivechooser.getSelected().getName());
     }));
-    System.out.println("Configured Button Bindings");
 
-    m_controls.gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper));
-    m_controls.highScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighScoringPosition, m_gripper);}));
-    m_controls.lowScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kLowScoringPosition, m_gripper);}));
-    m_controls.highIntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighIntakePosition, m_gripper);}));
-    m_controls.IntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kIntakePosition, m_gripper);}));
-    m_controls.HomeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHomePosition, m_gripper);}));
+    System.out.println("Configured Button Bindings");
+    m_controls.gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper,m_gripper));
+    m_controls.extendButton.onTrue(new InstantCommand(() -> {
+      if(m_dumbPivot.m_encoder.getPosition() < ArmPivot.kSafeExtendLimit){
+        m_elevator.toggle();
+      } else {
+        System.out.println("ARM IS TOO LOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      }
+
+    },m_elevator));
+    /*if (m_gripper != null) {
+      m_controls.gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper));
+    }
+    if (m_armPivot != null){
+      //m_controls.highScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighScoringPosition);}));
+      //m_controls.lowScoringButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kLowScoringPosition);}));
+      //m_controls.highIntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHighIntakePosition);}));
+      //m_controls.IntakeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kIntakePosition);}));
+      //m_controls.HomeButton.onTrue(new InstantCommand(() -> {m_armPivot.setTargetPosition(ArmPivot.kHomePosition);}));
+    }*/
+
+
 
  }
   private void setupDashboard(){
     // A chooser for autonomous commands
     // Add commands to the autonomous command chooser
+    m_autoChooser.addOption("Do Nothing", new WaitCommand(1));
+    //m_autoChooser.addOption("BACKWARDS Auto Balance", Commands.getInstance().pidBalanceAuto);
+    // m_autoChooser.addOption("(NOT DONE) Score Mid Cube", new WaitCommand(1)); //TODO
+    m_autoChooser.addOption("Drive Backwards", new DriveTimedCommand(2,-0.5,m_driveSubsystem));
     /*m_autochooser0.addOption("Wait Auto", m_complexAuto);
     m_autochooser0.addOption("Dropoff Auto", m_complexAuto);
     m_autochooser0.addOption("Move Auto", m_complexAuto);
@@ -167,6 +189,7 @@ public class RobotContainer {
     m_drivechooser.addOption("Curvature Drive", curvatureDriveCommand);
 
     SmartDashboard.putData("Control Setup", m_drivechooser);*/
+    SmartDashboard.putData("Autonomous", m_autoChooser);
 
   }
 
@@ -185,6 +208,10 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return new SequentialCommandGroup(this.m_autochooser0.getSelected(), this.m_autochooser1.getSelected(), this.m_autochooser2.getSelected(), this.m_autochooser3.getSelected());
+    //return new DriveTimedCommand(2,-0.5,m_driveSubsystem);
+    //return Commands.getInstance().drive_backwards;
+    return this.m_autoChooser.getSelected();
+    //return new SequentialCommandGroup(this.m_autochooser0.getSelected(), this.m_autochooser1.getSelected(), this.m_autochooser2.getSelected(), this.m_autochooser3.getSelected());
   }
 }
+

@@ -26,20 +26,30 @@ public class Controls {
     // Triggers!
     public final Trigger switchDriveButton =
             m_driverJoystick.button(Constants.BindingConstants.switchDrive);
-    public final Trigger gripperButton =
-            m_secondaryDriverController.rightTrigger().and(m_secondaryDriverController.leftTrigger());
-    public final Trigger lowScoringButton =
-            m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
-    public final Trigger highScoringButton =
-            m_secondaryDriverController.a();
+    public final Trigger gripperButton = m_secondaryDriverController.a();
+    public final Trigger extendButton = m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
+            //m_secondaryDriverController.rightTrigger().and(m_secondaryDriverController.leftTrigger());
+    //public final Trigger lowScoringButton =
+            //m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
+    //public final Trigger highScoringButton =
+            //m_secondaryDriverController.a();
     public final Trigger highIntakeButton =
             m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.b());
     public final Trigger IntakeButton =
             m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.y());
-    public final Trigger HomeButton =
-            m_secondaryDriverController.leftBumper().and(m_secondaryDriverController.x());
+    //public final Trigger HomeButton =
+            //m_secondaryDriverController.leftBumper().and(m_secondaryDriverController.x());
     public final Trigger WristPivotStick =
-            m_secondaryDriverController.leftStick();
+            m_secondaryDriverController.rightStick();
+    public final Trigger DPadUp = m_secondaryDriverController.povUp();
+    public final Trigger DPadDown = m_secondaryDriverController.povDown();
+    public final Trigger ArmPivotStick = m_secondaryDriverController.leftStick();
+    public double deadband(double input){
+        if (Math.abs(input) < 0.1){
+            return 0;
+        }
+        return input;
+    }
 
     public double getThrottledY(){
         return m_driverJoystick.getY() * adjustThrottle(m_driverJoystick.getThrottle());

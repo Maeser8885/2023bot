@@ -1,6 +1,6 @@
 TODO
 Autonomous Routines
 Driver Control
-Arm Control
-Pneumatics
 Auto Balancing (*doing this rn)
+TODO test auto balance
+TODO test positions

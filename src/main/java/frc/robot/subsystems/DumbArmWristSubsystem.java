@@ -5,45 +5,35 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.SparkMaxRelativeEncoder;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.PIDGains;
 import frc.robot.Constants;
 import frc.robot.Constants.MotorConstants;
 
-public class ArmWristSubsystem extends SubsystemBase {
+public class DumbArmWristSubsystem extends SubsystemBase {
 
+  private final SparkMaxPIDController m_controller;
   private CANSparkMax m_WRISTneo = new CANSparkMax(MotorConstants.kWRISTSparkMax, MotorType.kBrushless);
   private RelativeEncoder m_encoder;
 
   private double m_setpoint;
   private double m_prevSetpoint;
-  private SparkMaxPIDController m_controller;
+  //private SparkMaxPIDController m_controller;
 
   /** Creates a new ExampleSubsystem. */
-  public ArmWristSubsystem() {
+  public DumbArmWristSubsystem() {
 
     m_encoder = m_WRISTneo.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
 
     m_controller = m_WRISTneo.getPIDController();
     PIDGains.setSparkMaxGains(m_controller, Constants.ArmWrist.kPositionPIDGains);
     m_WRISTneo.setInverted(false);
-    m_WRISTneo.setSmartCurrentLimit(Constants.ArmWrist.kCurrentLimit);
-    m_WRISTneo.enableSoftLimit(CANSparkMax.SoftLimitDirection.kForward, true);
-    m_WRISTneo.enableSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, true);
-    m_WRISTneo.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, (float)Constants.ArmWrist.kSoftLimitForward);
-    m_WRISTneo.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, (float)Constants.ArmWrist.kSoftLimitReverse);
-
-    PIDGains.setSparkMaxGains(m_controller, Constants.ArmWrist.kPositionPIDGains);
-
-    m_WRISTneo.burnFlash();
 
     m_setpoint = Constants.ArmWrist.kWHomePosition;
 
@@ -53,15 +43,25 @@ public class ArmWristSubsystem extends SubsystemBase {
     m_setpoint = position;
   }
 
-  // Positive is out, Negative is in.
-  public void changePosition(double change){
-    if (m_setpoint + change > Constants.ArmWrist.kSoftLimitForward){
-      m_setpoint = Constants.ArmWrist.kSoftLimitForward;
-    } else if (m_setpoint + change < Constants.ArmWrist.kSoftLimitReverse){
-      m_setpoint = Constants.ArmWrist.kSoftLimitReverse;
+  public void changePosition(double amount){
+    // TODO TEST THIS TO GET BOUNDS
+    /*if (m_setpoint + amount >= Constants.ArmWrist.kMaxPosition){
+      m_setpoint = Constants.ArmWrist.kMaxPosition;
+    } else if (m_setpoint + amount <= Constants.ArmWrist.kWHomePosition){
+      m_setpoint = Constants.ArmWrist.kWHomePosition;
     }
-    m_setpoint += change;
+    else {
+      m_setpoint += amount;
+    }*/
+    m_setpoint += amount;
   }
+
+  // Positive is out, Negative is in.
+
+  /*public void set(double speed){
+    m_WRISTneo.set(speed);
+  }*/
+
 
 
 
@@ -72,6 +72,8 @@ public class ArmWristSubsystem extends SubsystemBase {
       m_controller.setReference(m_setpoint, CANSparkMax.ControlType.kPosition);
     }
     m_prevSetpoint = m_setpoint;
+    SmartDashboard.putNumber("Wrist Angle", m_encoder.getPosition());
+    SmartDashboard.putNumber("Expected Angle", m_setpoint);
   }
 
   /**

@@ -17,21 +17,24 @@ import frc.robot.Constants.PneumaticConstants;
 
 public class ArmElevatorSubsystem extends SubsystemBase {
 
-  DoubleSolenoid elevatorLDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PneumaticConstants.kLforward, PneumaticConstants.kLreverse);
-  DoubleSolenoid elevatorRDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PneumaticConstants.kRforward, PneumaticConstants.kRreverse);
+  DoubleSolenoid elevatorDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PneumaticConstants.kPortForward, PneumaticConstants.kPortReverse);
+  //DoubleSolenoid elevatorRDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PneumaticConstants.kRforward, PneumaticConstants.kRreverse);
 
   /** Creates a new ExampleSubsystem. */
-  public ArmElevatorSubsystem() {}
+  public ArmElevatorSubsystem() {
+    elevatorDoublePCM.set(kReverse);
+  }
 
   public void Extend() {
-    elevatorLDoublePCM.set(kForward);
-    elevatorRDoublePCM.set(kForward);
+    elevatorDoublePCM.set(kForward);
   }
   public void Retract() {
-    elevatorLDoublePCM.set(kReverse);
-    elevatorRDoublePCM.set(kReverse);
+    elevatorDoublePCM.set(kReverse);
   }
 
+  public void toggle(){
+    elevatorDoublePCM.toggle();
+  }
   /**
    * Example command factory method.
    *

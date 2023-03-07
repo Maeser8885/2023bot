@@ -13,6 +13,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.PIDGains;
@@ -27,6 +28,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
 
   private CANSparkMax m_LPIVOTneo = new CANSparkMax(MotorConstants.kLARMSparkMax, MotorType.kBrushless);
   private CANSparkMax m_RPIVOTneo = new CANSparkMax(MotorConstants.kRARMSparkMax, MotorType.kBrushless);
+  private MotorControllerGroup m_motorGroup;
 
   private double m_setpoint;
   private double m_prevSetpoint;
@@ -43,7 +45,6 @@ public class ArmPivotSubsystem extends SubsystemBase {
   public ArmPivotSubsystem() {
 
     m_RPIVOTneo.follow(m_LPIVOTneo, true);
-  
 
     m_encoder = m_LPIVOTneo.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     m_encoder.setPositionConversionFactor(Constants.ArmPivot.kPositionFactor);
@@ -61,7 +62,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
     updateMotionProfile();
   }
 
-  public void setTargetPosition(double _setpoint, GripperSubsystem _gripper) {
+  public void setTargetPosition(double _setpoint) {
     if (_setpoint != m_setpoint) {
       m_setpoint = _setpoint;
       updateMotionProfile();
@@ -74,6 +75,20 @@ public class ArmPivotSubsystem extends SubsystemBase {
     m_profile = new TrapezoidProfile(Constants.ArmPivot.kArmMotionConstraint, goal, state);
     m_timer.reset();
   }
+
+  public void runAutomatic() {
+    double elapsedTime = m_timer.get();
+    if (m_profile.isFinished(elapsedTime)) {
+      targetState = new TrapezoidProfile.State(m_setpoint, 0.0);
+    }
+    else {
+      targetState = m_profile.calculate(elapsedTime);
+    }
+
+    feedforward = Constants.ArmPivot.kArmFeedforward.calculate(m_encoder.getPosition()+Constants.ArmPivot.kArmZeroCosineOffset, targetState.velocity);
+    m_controller.setReference(targetState.position, CANSparkMax.ControlType.kPosition, 0, feedforward);
+  }
+
   public void runManual(double _power) {
     //reset and zero out a bunch of automatic mode stuff so exiting manual mode happens cleanly and passively
     m_setpoint = m_encoder.getPosition();

@@ -5,32 +5,38 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class GripperSubsystem extends SubsystemBase {
   
-  Solenoid gripSolenoidPCM = new Solenoid(PneumaticsModuleType.CTREPCM, 1);
+  DoubleSolenoid gripSolenoidPCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Constants.PneumaticConstants.kGripForward, Constants.PneumaticConstants.kGripReverse);
   private boolean gripperState = false; // opened = false, closed = true
 
   /** Creates a new ExampleSubsystem. */
   public GripperSubsystem() {
+    gripSolenoidPCM.set(DoubleSolenoid.Value.kReverse);
   }
    
   public void openGripper() {
-    gripSolenoidPCM.set(false);
+    gripSolenoidPCM.set(DoubleSolenoid.Value.kForward);
     gripperState = false;
   }
   public void closeGripper() {
-    gripSolenoidPCM.set(true);
+    gripSolenoidPCM.set(DoubleSolenoid.Value.kReverse);
     gripperState = true;
   } 
   public void toggleGripper() {
-    gripperState = !gripperState;
-    gripSolenoidPCM.set(gripperState);
+    if(gripSolenoidPCM.get() == DoubleSolenoid.Value.kOff){
+      gripSolenoidPCM.set(DoubleSolenoid.Value.kForward);
+    }
+    gripSolenoidPCM.toggle();
+    System.out.println("Toggled Gripper!!!!");
   }
 
   /**
@@ -58,7 +64,7 @@ public class GripperSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() { // This method will be called once per scheduler run
-    SmartDashboard.putBoolean("Gripper Open State" , !gripperState);
+    SmartDashboard.putString("Gripper State",gripSolenoidPCM.get().toString());
   }
 
   @Override
