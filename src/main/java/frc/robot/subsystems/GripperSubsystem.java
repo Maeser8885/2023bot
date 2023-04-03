@@ -15,12 +15,13 @@ import frc.robot.Constants;
 
 public class GripperSubsystem extends SubsystemBase {
   
-  DoubleSolenoid gripSolenoidPCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, Constants.PneumaticConstants.kGripForward, Constants.PneumaticConstants.kGripReverse);
+  DoubleSolenoid gripSolenoidPCM = new DoubleSolenoid(Constants.PneumaticConstants.kSecondaryPCM, PneumaticsModuleType.CTREPCM, Constants.PneumaticConstants.kGripForward, Constants.PneumaticConstants.kGripReverse);
   private boolean gripperState = false; // opened = false, closed = true
 
   /** Creates a new ExampleSubsystem. */
   public GripperSubsystem() {
     gripSolenoidPCM.set(DoubleSolenoid.Value.kReverse);
+    gripperState = true;
   }
    
   public void openGripper() {
@@ -32,9 +33,6 @@ public class GripperSubsystem extends SubsystemBase {
     gripperState = true;
   } 
   public void toggleGripper() {
-    if(gripSolenoidPCM.get() == DoubleSolenoid.Value.kOff){
-      gripSolenoidPCM.set(DoubleSolenoid.Value.kForward);
-    }
     gripSolenoidPCM.toggle();
     System.out.println("Toggled Gripper!!!!");
   }

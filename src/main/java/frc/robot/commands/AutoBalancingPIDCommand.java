@@ -1,6 +1,8 @@
 package frc.robot.commands;
 
+import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.ADIS16470_IMU;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -11,14 +13,22 @@ public class AutoBalancingPIDCommand extends CommandBase {
     // Thanks RI3D GOFIRST-Robotics!
     // github.com/GOFIRST-Robotics/Ri3D-2023
     private final DriveSubsystem driveSubsystem;
-    private final ADIS16470_IMU gyro = RobotContainer.getInstance().m_gyro;
+    //private final ADIS16470_IMU gyro = RobotContainer.getInstance().m_gyro;
+    private final AHRS navX;
 
     private double error;
     private double currentAngle;
     private double drivePower;
+    private Timer runTimer = new Timer();
+    private double currentTime;
+    private double prev_time = 0;
+    private double prev_error = 0;
+    private Timer end_Timer = new Timer();
+    private boolean timerRunning = false;
 
     public AutoBalancingPIDCommand(DriveSubsystem driveSubsystem) {
         this.driveSubsystem = driveSubsystem;
+        this.navX = driveSubsystem.navX;
         // each subsystem used by the command must be passed into the
         // addRequirements() method (which takes a vararg of Subsystem)
         addRequirements(this.driveSubsystem);
@@ -29,7 +39,8 @@ public class AutoBalancingPIDCommand extends CommandBase {
      */
     @Override
     public void initialize() {
-
+        end_Timer.reset();
+        timerRunning = false;
     }
 
     /**
@@ -38,14 +49,12 @@ public class AutoBalancingPIDCommand extends CommandBase {
      */
     @Override
     public void execute() {
-        this.currentAngle = gyro.getXComplementaryAngle();
+        this.currentAngle = navX.getRoll();
 
         error = Constants.balanceGoal - currentAngle;
-        drivePower = -Math.min(Constants.balanceKP * error, 1);
+        drivePower = Math.min(Constants.balanceKP * error, 1);
 // Our robot needed an extra push to drive up in reverse, probably due to weight imbalances
-        /*if (drivePower < 0) {
-            drivePower *= Constants.balanceBackwardsXTRAPOWA;
-        }*/
+        //drivePower *= Constants.balanceBackwardsXTRAPOWA;
 
         // Limit the max power
         if (Math.abs(drivePower) > 0.4) {
@@ -58,6 +67,7 @@ public class AutoBalancingPIDCommand extends CommandBase {
         System.out.println("Current Angle: " + currentAngle);
         System.out.println("Error " + error);
         System.out.println("Drive Power: " + drivePower);
+
     }
 
     /**
@@ -76,9 +86,28 @@ public class AutoBalancingPIDCommand extends CommandBase {
      */
     @Override
     public boolean isFinished() {
-        return Math.abs(error) < Constants.balanceThreshold; // End the command when we are within the specified threshold of being 'flat' (gyroscope pitch of 0 degrees)
-
+        if (Math.abs(error) < Constants.balanceThreshold){
+            if (timerRunning){
+                System.out.println("Timer:" + end_Timer.get());
+                if(end_Timer.get() > 2.0){
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                timerRunning = true;
+                end_Timer.start();
+                return false;
+            }
+        }
+        if (timerRunning){
+            end_Timer.stop();
+            end_Timer.reset();
+            timerRunning = false;
+        }
+        return false; // End the command when we are within the specified threshold of being 'flat' (gyroscope pitch of 0 degrees)
     }
+    //TODO Timer if in this state
 
     /**
      * The action to take when the command ends. Called when either the command
@@ -90,6 +119,6 @@ public class AutoBalancingPIDCommand extends CommandBase {
      */
     @Override
     public void end(boolean interrupted) {
-
+        driveSubsystem.driveArcade(0,0);
     }
 }

@@ -28,6 +28,7 @@ public class ArmWristSubsystem extends SubsystemBase {
   private SparkMaxPIDController m_controller;
 
   /** Creates a new ExampleSubsystem. */
+  @Deprecated
   public ArmWristSubsystem() {
 
     m_encoder = m_WRISTneo.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);

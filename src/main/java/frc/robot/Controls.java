@@ -1,10 +1,8 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.XboxController.Axis;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.Commands;
 
 public class Controls {
     private static Controls instance;
@@ -15,6 +13,7 @@ public class Controls {
         }
         return instance;
     }
+
     //public boolean m_debounce;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -24,26 +23,31 @@ public class Controls {
             new CommandJoystick(Constants.OperatorConstants.kDriverControllerPort);
 
     // Triggers!
-    public final Trigger switchDriveButton =
-            m_driverJoystick.button(Constants.BindingConstants.switchDrive);
-    public final Trigger gripperButton = m_secondaryDriverController.a();
-    public final Trigger extendButton = m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
+
+    // Primary Controls (DRIVING, ARM SETPOINTS)
+
+    //public final Trigger switchDriveButton =
+            //m_driverJoystick.button(Constants.BindingConstants.switchDrive);
+    public final Trigger gripperButton = m_driverJoystick.button(1); //m_secondaryDriverController.a();
+    public final Trigger extendButton = m_driverJoystick.button(3).and(m_driverJoystick.button(5)); //m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
             //m_secondaryDriverController.rightTrigger().and(m_secondaryDriverController.leftTrigger());
-    //public final Trigger lowScoringButton =
-            //m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.x());
-    //public final Trigger highScoringButton =
-            //m_secondaryDriverController.a();
-    public final Trigger highIntakeButton =
-            m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.b());
-    public final Trigger IntakeButton =
-            m_secondaryDriverController.rightBumper().and(m_secondaryDriverController.y());
-    //public final Trigger HomeButton =
-            //m_secondaryDriverController.leftBumper().and(m_secondaryDriverController.x());
-    public final Trigger WristPivotStick =
-            m_secondaryDriverController.rightStick();
-    public final Trigger DPadUp = m_secondaryDriverController.povUp();
-    public final Trigger DPadDown = m_secondaryDriverController.povDown();
-    public final Trigger ArmPivotStick = m_secondaryDriverController.leftStick();
+    public final Trigger midScoringPresetButton =
+            m_driverJoystick.button(10);
+    public final Trigger highScoringPresetButton =
+            m_driverJoystick.button(8);
+    public final Trigger highIntakePresetButton =
+            m_driverJoystick.button(9);
+    public final Trigger intakePresetButton =
+            m_driverJoystick.button(11);
+    public final Trigger homePresetButton =
+            m_driverJoystick.button(12);
+    public final Trigger wristDeployButton =
+            m_driverJoystick.button(7);
+
+    // Secondary Driver Control (LED AND MANUAL)
+    public final Trigger CubeButton = m_secondaryDriverController.x();
+    public final Trigger ConeButton = m_secondaryDriverController.y();
+
     public double deadband(double input){
         if (Math.abs(input) < 0.1){
             return 0;
@@ -56,7 +60,7 @@ public class Controls {
     }
 
     public double getThrottledTwist(){
-        return m_driverJoystick.getTwist() * adjustThrottle(m_driverJoystick.getThrottle());
+        return 0.5 * m_driverJoystick.getTwist() * adjustThrottle(m_driverJoystick.getThrottle());
     }
 
     public double getThrottledX(){

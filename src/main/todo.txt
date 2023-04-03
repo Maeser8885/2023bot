@@ -4,3 +4,7 @@ Driver Control
 Auto Balancing (*doing this rn)
 TODO test auto balance
 TODO test positions
+
+TODO Find wrist Limits
+TODO Test Rumble Limits & extend
+

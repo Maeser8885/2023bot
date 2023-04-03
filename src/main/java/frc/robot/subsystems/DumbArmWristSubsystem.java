@@ -21,6 +21,7 @@ public class DumbArmWristSubsystem extends SubsystemBase {
   private final SparkMaxPIDController m_controller;
   private CANSparkMax m_WRISTneo = new CANSparkMax(MotorConstants.kWRISTSparkMax, MotorType.kBrushless);
   private RelativeEncoder m_encoder;
+  private boolean isDeployed = false;
 
   private double m_setpoint;
   private double m_prevSetpoint;
@@ -36,25 +37,44 @@ public class DumbArmWristSubsystem extends SubsystemBase {
     m_WRISTneo.setInverted(false);
 
     m_setpoint = Constants.ArmWrist.kWHomePosition;
+    m_WRISTneo.setSmartCurrentLimit(10);
 
   }
 
   public void setPosition(double position){
     m_setpoint = position;
+    isDeployed = m_setpoint > 3;
   }
 
-  public void changePosition(double amount){
-    // TODO TEST THIS TO GET BOUNDS
-    /*if (m_setpoint + amount >= Constants.ArmWrist.kMaxPosition){
+  public boolean checkDeployed(){
+    SmartDashboard.putBoolean("Wrist Deployed", isDeployed);
+    return isDeployed;
+  }
+
+  public boolean changePosition(double amount){ // return true if at limits\
+
+    if (m_setpoint + amount > Constants.ArmWrist.kMaxPosition){
       m_setpoint = Constants.ArmWrist.kMaxPosition;
-    } else if (m_setpoint + amount <= Constants.ArmWrist.kWHomePosition){
+      return true;
+    } else if (m_setpoint + amount < Constants.ArmWrist.kWHomePosition){
       m_setpoint = Constants.ArmWrist.kWHomePosition;
+      return true;
     }
     else {
       m_setpoint += amount;
-    }*/
-    m_setpoint += amount;
+      return false;
+    }
+
   }
+  /*private Constants.Limits checkInBounds(double point){
+    // Less than max cuz arm points are always negative
+    if (point > Constants.ArmWrist.kMaxPosition){
+      return Constants.Limits.MAX;
+    } else if (point < Constants.ArmWrist.kMinPosition){
+      return Constants.Limits.MIN;
+    }
+    return Constants.Limits.NONE;
+  }*/
 
   // Positive is out, Negative is in.
 

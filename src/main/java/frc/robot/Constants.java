@@ -25,7 +25,8 @@ public final class Constants {
   // Used in Balancing 
   public static final int autoConst = 20;
   public static final double balanceGoal = 0; //TODO CHANGE ME
-  public static final double balanceKP = 0.015; // TODO CHANGE ME
+  public static final double balanceKP = 0.025; // TODO CHANGE ME .021
+  public static final double balanceKD = 0.01;
   public static final double balanceThreshold = 1.0; // Maybe change?
   public static final double balanceBackwardsXTRAPOWA = 1.35; //TODO CHANGE ME
   public static final int PCMCan = 6;
@@ -49,38 +50,42 @@ public final class Constants {
   public static class BindingConstants {
     public static final int switchDrive = 7;
   }
+
+  public static enum Limits {
+    MAX,
+    MIN,
+    NONE
+  }
+
+  public static class DashboardStrings
+  {
+    public static final String matrix_mode_str = "matrix_mode";
+  }
   public static class ArmPivot { //Subject to Change.
     public static final PIDGains kPositionPIDGains = new PIDGains(0.2, 0.0, 0.0);
 
-    public static final double kArmGearRatio = 1.0 / (48.0 * (62.0/16.0));
-    public static final double kPositionFactor = kArmGearRatio * 2.0 * Math.PI; //multiply SM value by this number and get arm position in radians
-    public static final double kVelocityFactor = kArmGearRatio * 2.0 * Math.PI / 60.0;
-    public static final double kArmFreeSpeed = 5676.0 * kVelocityFactor;
-    public static final double kArmZeroCosineOffset = Math.PI / 6; //radians to add to converted arm position to get real-world arm position (starts at ~30deg angle)
-    public static final ArmFeedforward kArmFeedforward = new ArmFeedforward(0.0, 0.4, 12.0/kArmFreeSpeed, 0.0);
-    //public static final PIDGains kArmPositionGains = new PIDGains(0.1, 0.0, 0.0);
-    public static final TrapezoidProfile.Constraints kArmMotionConstraint = new TrapezoidProfile.Constraints(2.0, 2.0);
+    public static final double kSafeExtendLimit = -25.0;
+    public static final double kHomePosition = 0.0;
+    public static final double kHighScoringPosition = -50.0;
+    public static final double kMidScoringPosition = -40;
+    public static final double kIntakePosition = -5.85;
+    public static final double kHighIntakePosition = -38;
 
-    public static final double kSafeExtendLimit = -25.0; //TODO
-    public static final double kHomePosition = 0.0; //TODO
-    public static final double kHighScoringPosition = 0.0;
-    public static final double kMidScoringPosition = 0.0;
-    public static final double kIntakePosition = 0.0;
-    public static final double kHighIntakePosition = 0.0;
+    public static final double kMaxPosition = -90.0;
+    public static final double kMinPosition = 0.0;
     //public static final double kFeederPosition = 2.95; Was this for high intake?? Oh well.
   }
   public static class ArmWrist { //Subject to Change.
-    public static final double kWHomePosition = 0.0;
-    public static final double kWHighScoringPosition = 0.0;
-    public static final double kWMidScoringPosition = 0.0;
-    public static final double kWIntakePosition = 0.0;
-    public static final double kWHighIntakePosition = 0.0;
+    public static final double kWHomePosition = 0.1;
+    public static final double kWHighScoringPosition = 42.7;
+    public static final double kWMidScoringPosition = 42.7;
+    public static final double kWIntakePosition = 42.7;
+    public static final double kWHighIntakePosition = 42.7;
+    public static final double kWCarryPosition = 2.8;
 
-    // TODO Positions
-    public static final double kSoftLimitReverse = -34.0;
-    public static final double kSoftLimitForward = 5.0;
     //public static final double kHomePosition = 0.0;
-    public static final double kMaxPosition = 47.0;
+    public static final double kMaxPosition = 43.0;
+    //public static final double kMinPosition = 0.0;
     //public static final double kSafePosition = -29.0;
     public static final int kCurrentLimit = 20;
     public static final PIDGains kPositionPIDGains = new PIDGains(0.1, 0.0, 0.0);
@@ -88,13 +93,29 @@ public final class Constants {
     public static final double kGearRatio = 1.0 / (48.0 * (6.0 / 2.0));
   }
   public static class PneumaticConstants {
+    public static int kSecondaryPCM = 1;
     // Used in ArmElevatorSubsystem
-    public static final int kPortForward = 0;
-    public static final int kPortReverse = 1;
-    public static final int kGripForward = 2;
-    public static final int kGripReverse = 3;
+    public static final int kL_PortForward = 4;
+    public static final int kL_PortReverse = 5;
+
+    public static final int kR_PortForward = 6;
+    public static final int kR_PortReverse = 7;
+    public static final int kGripForward = 1;
+    public static final int kGripReverse = 0;
   }
   public static class AutoConstants {
     public static final double kAutoDriveDistanceInches = 5;
   }
 }
+
+
+ /* public static final double kArmGearRatio = 1.0 / (48.0 * (62.0/16.0));
+  public static final double kPositionFactor = kArmGearRatio * 2.0 * Math.PI; //multiply SM value by this number and get arm position in radians
+  public static final double kVelocityFactor = kArmGearRatio * 2.0 * Math.PI / 60.0;
+  public static final double kArmFreeSpeed = 5676.0 * kVelocityFactor;
+  public static final double kArmZeroCosineOffset = Math.PI / 6; //radians to add to converted arm position to get real-world arm position (starts at ~30deg angle)
+  public static final ArmFeedforward kArmFeedforward = new ArmFeedforward(0.0, 0.4, 12.0/kArmFreeSpeed, 0.0);
+  //public static final PIDGains kArmPositionGains = new PIDGains(0.1, 0.0, 0.0);
+  public static final TrapezoidProfile.Constraints kArmMotionConstraint = new TrapezoidProfile.Constraints(2.0, 2.0);
+
+*/

@@ -4,19 +4,21 @@
 
 package frc.robot;
 
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants.ArmPivot;
-import frc.robot.commands.Commands;
+import frc.robot.commands.AutoBalancingPIDCommand;
 import frc.robot.commands.DriveTimedCommand;
 import frc.robot.subsystems.*;
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.ADIS16470_IMU;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import com.kauailabs.navx.frc.AHRS;
+
+import java.util.Map;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -38,17 +40,45 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   public final GripperSubsystem m_gripper = new GripperSubsystem();
   public final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
-  public final ArmPivotSubsystem m_armPivot=null;// = new ArmPivotSubsystem();
+  //public final ArmPivotSubsystem m_armPivot=null;// = new ArmPivotSubsystem();
   public final DumbArmPivotSubsystem m_dumbPivot = new DumbArmPivotSubsystem();
 
   public final DumbArmWristSubsystem m_dumbWrist = new DumbArmWristSubsystem();
   public final ArmElevatorSubsystem m_elevator = new ArmElevatorSubsystem();
+  private boolean rumbling = true;
 
   // ADIS Gyro
-  public ADIS16470_IMU m_gyro = new ADIS16470_IMU();
+  //public ADIS16470_IMU m_gyro = new ADIS16470_IMU();
+
 
   public Controls m_controls = Controls.getInstance();
+  UsbCamera camera1;
+  UsbCamera camera2;
 
+  //public frc.robot.commands.Commands m_commands = frc.robot.commands.Commands.getInstance();
+  public static enum ArmStatuses {
+    HOME,
+    INTAKE,
+    MID,
+    HIGH_INTAKE,
+    HIGH
+  }
+  public static ArmStatuses m_armStatus = ArmStatuses.HOME;
+  public static Map<ArmStatuses,Double> m_wristPositions = Map.ofEntries(
+          Map.entry(ArmStatuses.HOME,Constants.ArmWrist.kWHomePosition),
+          Map.entry(ArmStatuses.INTAKE,Constants.ArmWrist.kWIntakePosition),
+          Map.entry(ArmStatuses.MID,Constants.ArmWrist.kWMidScoringPosition),
+          Map.entry(ArmStatuses.HIGH_INTAKE,Constants.ArmWrist.kWHighIntakePosition),
+          Map.entry(ArmStatuses.HIGH,Constants.ArmWrist.kWHighScoringPosition)
+  );
+
+  public static Map<ArmStatuses,Double> m_wristSuckPositions = Map.ofEntries(
+          Map.entry(ArmStatuses.HOME,Constants.ArmWrist.kWHomePosition),
+          Map.entry(ArmStatuses.INTAKE,Constants.ArmWrist.kWCarryPosition),
+          Map.entry(ArmStatuses.MID,Constants.ArmWrist.kWCarryPosition),
+          Map.entry(ArmStatuses.HIGH_INTAKE,Constants.ArmWrist.kWCarryPosition),
+          Map.entry(ArmStatuses.HIGH,Constants.ArmWrist.kWCarryPosition)
+  );
 
   //private final Solenoid fake;
   
@@ -58,6 +88,53 @@ public class RobotContainer {
   //SendableChooser<Command> m_autochooser3 = new SendableChooser<>();
 
   SendableChooser<RunCommand> m_drivechooser = new SendableChooser<>();
+
+  public Command getNewMidDropoff(){
+    return new SequentialCommandGroup(
+            new InstantCommand(()->m_dumbPivot.setPos(Constants.ArmPivot.kMidScoringPosition),m_dumbPivot),
+            new WaitCommand(1),
+            new InstantCommand(()->m_dumbWrist.setPosition(Constants.ArmWrist.kWMidScoringPosition),m_dumbWrist),
+            new WaitCommand(1),
+            new InstantCommand(m_gripper::openGripper, m_gripper),
+            new WaitCommand(1),
+            new InstantCommand(()->m_dumbWrist.setPosition(Constants.ArmPivot.kHomePosition),m_dumbWrist),
+            new WaitCommand(1),
+            new InstantCommand(()->m_dumbPivot.setPos(Constants.ArmWrist.kWHomePosition),m_dumbPivot)
+    );
+  }
+
+  public Command getNewHighDropoff(){
+    return new SequentialCommandGroup(
+            new InstantCommand(()->m_dumbPivot.setPos(ArmPivot.kHighScoringPosition),m_dumbPivot),
+            new WaitCommand(1.5),
+            new InstantCommand(m_elevator::Extend,m_elevator),
+            new WaitCommand(1),
+            new InstantCommand(()->m_dumbWrist.setPosition(Constants.ArmWrist.kWHighScoringPosition),m_dumbWrist),
+            new WaitCommand(1),
+            new InstantCommand(m_gripper::openGripper, m_gripper),
+            new WaitCommand(.5),
+            new InstantCommand(()->m_dumbWrist.setPosition(Constants.ArmWrist.kWHomePosition),m_dumbWrist),
+            new WaitCommand(.5),
+            new InstantCommand(m_elevator::Retract,m_elevator),
+            new WaitCommand(1),
+            new InstantCommand(()->m_dumbPivot.setPos(Constants.ArmWrist.kWHomePosition),m_dumbPivot)
+    );
+  }
+  public final Command pidBalanceAuto = new SequentialCommandGroup(
+          new DriveTimedCommand(1.5,-0.5,m_driveSubsystem),
+          new AutoBalancingPIDCommand(m_driveSubsystem)
+  );
+
+  private final SequentialCommandGroup highScoreDriveBackwards = new SequentialCommandGroup(
+          getNewHighDropoff(),
+          new DriveTimedCommand(3,-0.5,m_driveSubsystem)
+  );
+
+  private final SequentialCommandGroup highScoreBalance = new SequentialCommandGroup(
+          getNewHighDropoff(),
+          new DriveTimedCommand(1.5,-0.5,m_driveSubsystem),
+          new AutoBalancingPIDCommand(m_driveSubsystem)
+  );
 
   private final RunCommand defaultDriveCommand = new RunCommand(()->{
     m_driveSubsystem.driveArcade(-m_controls.getThrottledY(), -m_controls.getThrottledTwist());
@@ -71,6 +148,21 @@ public class RobotContainer {
     m_driveSubsystem.driveCurvature(-m_controls.getThrottledY(), m_controls.getThrottledTwist(), m_controls.m_driverJoystick.button(11).getAsBoolean());
   }, m_driveSubsystem);
 
+  private final SequentialCommandGroup rumbleCommandGroup = new SequentialCommandGroup(
+          new InstantCommand(()-> m_controls.m_secondaryDriverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.5)),
+          new WaitCommand(.5),
+          new InstantCommand(()-> m_controls.m_secondaryDriverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0))
+  );
+  private final SequentialCommandGroup shortRumbleCommandGroup = new SequentialCommandGroup(
+          new InstantCommand(()-> m_controls.m_secondaryDriverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.5)),
+          new WaitCommand(.1),
+          new InstantCommand(()-> m_controls.m_secondaryDriverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0))
+  );
+
+
+
+
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     //fake = new Solenoid(PneumaticsModuleType.CTREPCM, 7);
@@ -83,15 +175,30 @@ public class RobotContainer {
     curvatureDriveCommand.setName("curvature");
 
     m_driveSubsystem.setDefaultCommand(defaultDriveCommand);
-    m_dumbPivot.setDefaultCommand(new RunCommand(() -> m_dumbPivot.changePos(m_controls.deadband(m_controls.m_secondaryDriverController.getLeftY())*-0.5),m_dumbPivot));
-    m_dumbWrist.setDefaultCommand(new RunCommand(() -> m_dumbWrist.changePosition(m_controls.deadband(m_controls.m_secondaryDriverController.getRightY())*0.5),m_dumbWrist));
+
+    m_dumbPivot.setDefaultCommand(new RunCommand(() -> {
+
+      if(m_dumbPivot.changePos(m_controls.deadband(m_controls.m_secondaryDriverController.getLeftY())*-0.5)){
+          CommandScheduler.getInstance().schedule(rumbleCommandGroup);
+      }
+
+    },m_dumbPivot));
+
+    m_dumbWrist.setDefaultCommand(new RunCommand(() -> {
+      if(m_dumbWrist.changePosition(m_controls.deadband(m_controls.m_secondaryDriverController.getRightY())*0.5)){
+        CommandScheduler.getInstance().schedule(rumbleCommandGroup);
+      }
+    },m_dumbWrist));
     /*m_driveSubsystem.setDefaultCommand(new RunCommand(()->{
       m_driveSubsystem.driveArcade(-m_driverJoystick.getY(), -m_driverJoystick.getTwist());
     }, //TODO: Rotation throttle?
     m_driveSubsystem));*/
 
     // Aaron was here :D
-    CameraServer.startAutomaticCapture();
+    camera1 = CameraServer.startAutomaticCapture(0);
+    camera2 = CameraServer.startAutomaticCapture(1);
+    camera1.setFPS(15);
+    camera2.setFPS(15);
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -121,11 +228,11 @@ public class RobotContainer {
     //  .onFalse(new InstantCommand(() -> m_gripper.closeGripper()));
 
     // Button Configuring!!
-    m_controls.switchDriveButton.onTrue(new InstantCommand(()->{
+    /*m_controls.switchDriveButton.onTrue(new InstantCommand(()->{
       CommandScheduler.getInstance().cancel(m_driveSubsystem.getDefaultCommand());
       this.m_driveSubsystem.setDefaultCommand(this.m_drivechooser.getSelected());
       System.out.println(this.m_drivechooser.getSelected().getName());
-    }));
+    }));*/
 
     System.out.println("Configured Button Bindings");
     m_controls.gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper,m_gripper));
@@ -134,9 +241,45 @@ public class RobotContainer {
         m_elevator.toggle();
       } else {
         System.out.println("ARM IS TOO LOW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        CommandScheduler.getInstance().schedule(rumbleCommandGroup);
       }
-
     },m_elevator));
+    m_controls.highScoringPresetButton.onTrue(new InstantCommand(()->{
+      m_dumbPivot.setPos(ArmPivot.kHighScoringPosition);
+      m_armStatus = ArmStatuses.HIGH;
+      },m_dumbPivot));
+    m_controls.midScoringPresetButton.onTrue(new InstantCommand(()->{
+      m_dumbPivot.setPos(ArmPivot.kMidScoringPosition);
+      m_armStatus = ArmStatuses.MID;
+      },m_dumbPivot));
+    m_controls.highIntakePresetButton.onTrue(new InstantCommand(()->{
+      m_dumbPivot.setPos(ArmPivot.kHighIntakePosition);
+      m_armStatus = ArmStatuses.HIGH_INTAKE;
+      },m_dumbPivot));
+    m_controls.intakePresetButton.onTrue(new InstantCommand(()->{
+      if(m_elevator.getExtended()){
+        m_elevator.Retract();
+      }
+      m_dumbPivot.setPos(ArmPivot.kIntakePosition);
+      m_armStatus = ArmStatuses.INTAKE;
+      CommandScheduler.getInstance().schedule(shortRumbleCommandGroup);
+      },m_dumbPivot,m_elevator));
+    // TODO MAKE SURE THAT ELEVATOR IS RETRACTED HERE
+    m_controls.homePresetButton.onTrue(new InstantCommand(()->{
+      if(m_elevator.getExtended()){
+        m_elevator.Retract();
+      }
+      m_dumbPivot.setPos(ArmPivot.kHomePosition);
+      m_armStatus = ArmStatuses.HOME;
+      CommandScheduler.getInstance().schedule(shortRumbleCommandGroup);
+      },m_dumbPivot,m_elevator));
+    m_controls.wristDeployButton.onTrue(new ConditionalCommand(
+            new InstantCommand(()->{m_dumbWrist.setPosition(m_wristSuckPositions.get(m_armStatus));},m_dumbWrist),
+            new InstantCommand(()->{m_dumbWrist.setPosition(m_wristPositions.get(m_armStatus));},m_dumbWrist),
+            m_dumbWrist::checkDeployed
+    ));
+    m_controls.CubeButton.onTrue(new InstantCommand(()->SmartDashboard.putString(Constants.DashboardStrings.matrix_mode_str,"cube")));
+    m_controls.ConeButton.onTrue(new InstantCommand(()->SmartDashboard.putString(Constants.DashboardStrings.matrix_mode_str,"cone")));
     /*if (m_gripper != null) {
       m_controls.gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper));
     }
@@ -156,8 +299,13 @@ public class RobotContainer {
     // Add commands to the autonomous command chooser
     m_autoChooser.addOption("Do Nothing", new WaitCommand(1));
     //m_autoChooser.addOption("BACKWARDS Auto Balance", Commands.getInstance().pidBalanceAuto);
-    // m_autoChooser.addOption("(NOT DONE) Score Mid Cube", new WaitCommand(1)); //TODO
+    // m_autoChooser.addOption("(NOT DONE) Score Mid Cube", new WaitCommand(1));
     m_autoChooser.addOption("Drive Backwards", new DriveTimedCommand(2,-0.5,m_driveSubsystem));
+    m_autoChooser.addOption("Dropoff Mid",getNewMidDropoff());
+    m_autoChooser.addOption("Dropoff HIGH",getNewHighDropoff());
+    m_autoChooser.addOption("Auto Balance Backwards",pidBalanceAuto);
+    m_autoChooser.addOption("Score Retreat",highScoreDriveBackwards);
+    m_autoChooser.addOption("Score then Balance",highScoreBalance);
     /*m_autochooser0.addOption("Wait Auto", m_complexAuto);
     m_autochooser0.addOption("Dropoff Auto", m_complexAuto);
     m_autochooser0.addOption("Move Auto", m_complexAuto);
@@ -195,9 +343,6 @@ public class RobotContainer {
 
 
   public double getGyroReading() {
-    m_gyro.getAngle();
-    m_gyro.getXComplementaryAngle();
-    m_gyro.getYComplementaryAngle();
     return 0.0;
   }
 

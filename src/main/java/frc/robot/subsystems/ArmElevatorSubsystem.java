@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import static edu.wpi.first.wpilibj.DoubleSolenoid.Value.*;
 
@@ -11,29 +12,36 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.PneumaticConstants;
 
 // Aaron was here :D
 
 public class ArmElevatorSubsystem extends SubsystemBase {
-
-  DoubleSolenoid elevatorDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PneumaticConstants.kPortForward, PneumaticConstants.kPortReverse);
-  //DoubleSolenoid elevatorRDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, PneumaticConstants.kRforward, PneumaticConstants.kRreverse);
+  public Compressor armCompressor = new Compressor(0, PneumaticsModuleType.CTREPCM);
+  DoubleSolenoid elevatorLDouble = new DoubleSolenoid(Constants.PneumaticConstants.kSecondaryPCM, PneumaticsModuleType.CTREPCM, PneumaticConstants.kL_PortForward, PneumaticConstants.kL_PortReverse);
+  DoubleSolenoid elevatorRDouble = new DoubleSolenoid(Constants.PneumaticConstants.kSecondaryPCM, PneumaticsModuleType.CTREPCM, PneumaticConstants.kR_PortForward, PneumaticConstants.kR_PortReverse);
 
   /** Creates a new ExampleSubsystem. */
   public ArmElevatorSubsystem() {
-    elevatorDoublePCM.set(kReverse);
+    Retract();
   }
 
   public void Extend() {
-    elevatorDoublePCM.set(kForward);
+    elevatorLDouble.set(kForward);
+    elevatorRDouble.set(kForward);
+  }
+  public boolean getExtended(){
+    return elevatorLDouble.get() == kForward;
   }
   public void Retract() {
-    elevatorDoublePCM.set(kReverse);
+    elevatorLDouble.set(kReverse);
+    elevatorRDouble.set(kReverse);
   }
 
   public void toggle(){
-    elevatorDoublePCM.toggle();
+    elevatorLDouble.toggle();
+    elevatorRDouble.toggle();
   }
   /**
    * Example command factory method.

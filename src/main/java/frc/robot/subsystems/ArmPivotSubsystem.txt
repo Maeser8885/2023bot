@@ -42,6 +42,7 @@ public class ArmPivotSubsystem extends SubsystemBase {
   private double manualValue;
 
   /** Creates a new ExampleSubsystem. */
+  @Deprecated
   public ArmPivotSubsystem() {
 
     m_RPIVOTneo.follow(m_LPIVOTneo, true);
