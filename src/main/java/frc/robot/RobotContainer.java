@@ -45,8 +45,9 @@ public class RobotContainer {
 
   public final DumbArmWristSubsystem m_dumbWrist = new DumbArmWristSubsystem();
   public final ArmElevatorSubsystem m_elevator = new ArmElevatorSubsystem();
-  private boolean rumbling = true;
-
+  private boolean rumbling = true; // Is this needed?
+  public final ZipMotorSubsystem m_zipMotor = new ZipMotorSubsystem();
+  public final ZipPneumaticsSubsystem m_zipPneumatics = new ZipPneumaticsSubsystem();
   // ADIS Gyro
   //public ADIS16470_IMU m_gyro = new ADIS16470_IMU();
 
@@ -264,6 +265,25 @@ public class RobotContainer {
       m_armStatus = ArmStatuses.INTAKE;
       CommandScheduler.getInstance().schedule(shortRumbleCommandGroup);
       },m_dumbPivot,m_elevator));
+
+
+    //Zipline arm and movement code
+
+    //Toggling the zipline arm Solenoid direction when button is pressed
+    //If this does not work, instead of using toggleOnTrue, use a similar method as used on lines 288-300 (the 22 lines below the todo make sure the elevator is retracted thingy)
+    m_controls.armToggleButton.toggleOnTrue(new InstantCommand(()->{
+      m_zipPneumatics.toggle();
+    }, m_zipPneumatics));
+    //Making the zipline go when zipGoButton (2) is pressed
+    m_controls.zipGoButton.onTrue(new InstantCommand(()->{
+      m_zipMotor.go();
+    }, m_zipMotor));
+    //Making the zipline stop when zipGoButton (2) stops being pressed
+    m_controls.zipGoButton.onFalse(new InstantCommand(()->{
+      m_zipMotor.stop();
+    }, m_zipMotor));
+
+
     // TODO MAKE SURE THAT ELEVATOR IS RETRACTED HERE
     m_controls.homePresetButton.onTrue(new InstantCommand(()->{
       if(m_elevator.getExtended()){
@@ -280,6 +300,8 @@ public class RobotContainer {
     ));
     m_controls.CubeButton.onTrue(new InstantCommand(()->SmartDashboard.putString(Constants.DashboardStrings.matrix_mode_str,"cube")));
     m_controls.ConeButton.onTrue(new InstantCommand(()->SmartDashboard.putString(Constants.DashboardStrings.matrix_mode_str,"cone")));
+
+    
     //Zipline Controls TODO: finish this
     //m_controls.armToggleButton.onTrue()
     

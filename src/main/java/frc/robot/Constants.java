@@ -112,7 +112,7 @@ public final class Constants {
     //Compressor constants
     public static final int kZipArmForward = 0;
     public static final int kZipArmReverse = 0;
-    public static final int kZipArmModule = 0;
+    public static final int kZipCompressorModule = 0; 
     public static final int kZipSolenoidModule = 0;
     //Ty don't be mad at us this is all we have please.
     public static final boolean go = true;
