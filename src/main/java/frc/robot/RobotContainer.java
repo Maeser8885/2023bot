@@ -280,7 +280,7 @@ public class RobotContainer {
     }, m_zipMotor));
     //Making the zipline stop when zipGoButton (2) stops being pressed
     m_controls.zipGoButton.onFalse(new InstantCommand(()->{
-      m_zipMotor.stop();
+      m_zipMotor.notGo();
     }, m_zipMotor));
 
 
