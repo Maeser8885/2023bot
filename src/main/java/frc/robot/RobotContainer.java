@@ -275,11 +275,11 @@ public class RobotContainer {
       m_zipPneumatics.toggle();
     }, m_zipPneumatics));
     //Making the zipline go when zipGoButton (2) is pressed
-    m_controls.zipGoButton.onTrue(new InstantCommand(()->{
+    m_controls.zipGoButton.toggleOnTrue(new InstantCommand(()->{
       m_zipMotor.go();
     }, m_zipMotor));
     //Making the zipline stop when zipGoButton (2) stops being pressed
-    m_controls.zipGoButton.onFalse(new InstantCommand(()->{
+    m_controls.zipGoButton.toggleOnFalse(new InstantCommand(()->{
       m_zipMotor.notGo();
     }, m_zipMotor));
 
