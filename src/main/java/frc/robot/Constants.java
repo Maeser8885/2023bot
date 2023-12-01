@@ -106,6 +106,21 @@ public final class Constants {
   public static class AutoConstants {
     public static final double kAutoDriveDistanceInches = 5;
   }
+
+  public static class ZiplineConstants{
+    //TODO change numbers for everything after asking electrical
+    //Compressor constants
+    public static final int kZipArmForward = 0;
+    public static final int kZipArmReverse = 0;
+    public static final int kZipArmModule = 0;
+    public static final int kZipSolenoidModule = 0;
+    //Ty don't be mad at us this is all we have please.
+    public static final boolean go = true;
+    public static final boolean notGo = false;
+    //Motor constants
+    public static final int kMotorPort = 0;
+    public static final double kSparkMaxRPM = 0.0;
+  }
 }
 
 

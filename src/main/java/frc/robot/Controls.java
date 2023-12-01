@@ -43,7 +43,11 @@ public class Controls {
             m_driverJoystick.button(12);
     public final Trigger wristDeployButton =
             m_driverJoystick.button(7);
-
+    public final Trigger armToggleButton =
+            m_driverJoystick.button(4).and(m_driverJoystick.button(6));
+    public final Trigger zipGoButton =
+            m_driverJoystick.button(2);
+    
     // Secondary Driver Control (LED AND MANUAL)
     public final Trigger CubeButton = m_secondaryDriverController.x();
     public final Trigger ConeButton = m_secondaryDriverController.y();

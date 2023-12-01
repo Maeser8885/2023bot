@@ -158,7 +158,7 @@ public class RobotContainer {
           new WaitCommand(.1),
           new InstantCommand(()-> m_controls.m_secondaryDriverController.getHID().setRumble(GenericHID.RumbleType.kBothRumble, 0.0))
   );
-
+  
 
 
 
@@ -280,6 +280,9 @@ public class RobotContainer {
     ));
     m_controls.CubeButton.onTrue(new InstantCommand(()->SmartDashboard.putString(Constants.DashboardStrings.matrix_mode_str,"cube")));
     m_controls.ConeButton.onTrue(new InstantCommand(()->SmartDashboard.putString(Constants.DashboardStrings.matrix_mode_str,"cone")));
+    //Zipline Controls TODO: finish this
+    //m_controls.armToggleButton.onTrue()
+    
     /*if (m_gripper != null) {
       m_controls.gripperButton.onTrue(new InstantCommand(m_gripper::toggleGripper));
     }
