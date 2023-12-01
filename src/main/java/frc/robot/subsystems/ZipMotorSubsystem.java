@@ -22,8 +22,8 @@ public class ZipMotorSubsystem extends SubsystemBase {
   public void go(){
     zipMotor.set(1.0);
   }
-//dont get mad at me charlie this is all I have
-  public void notGo(){ 
+//Don't change this unless you change all the references to it
+  public void stop(){ 
     zipMotor.set(0.0);
   }
 
