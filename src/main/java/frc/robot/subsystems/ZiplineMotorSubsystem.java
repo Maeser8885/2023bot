@@ -14,7 +14,7 @@ public class ZiplineMotorSubsystem extends SubsystemBase {
         zipMotor.set(1.0);
     }
 
-    public void stop(){
+    public void notGo(){
         zipMotor.set(0.0);
     }
 }
