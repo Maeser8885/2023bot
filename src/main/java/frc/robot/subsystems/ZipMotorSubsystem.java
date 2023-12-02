@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ZiplineConstants;
@@ -61,7 +62,9 @@ public class ZipMotorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     zipMotor.set(speed);
-    
+    SmartDashboard.putNumber("ZIPMOTOR", zipMotor.get());
+    SmartDashboard.putNumber("BUSVOLTAGE", zipMotor.getBusVoltage());
+    SmartDashboard.putNumber("APPLIEDOUTPUT", zipMotor.getAppliedOutput());
     // This method will be called once per scheduler run
   }
 
