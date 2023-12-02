@@ -22,7 +22,7 @@ public class ZipMotorSubsystem extends SubsystemBase {
 
   public void go(){
     speed = reversed ? -1.0 : 1.0;
-    zipMotor.setVoltage(5.0);
+    zipMotor.setVoltage(10.0);
   }
 //changed references lmk if there are anymore
   public void notGo(){ 
