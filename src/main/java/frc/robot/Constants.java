@@ -111,15 +111,16 @@ public final class Constants {
     //TODO change numbers for everything after asking electrical
     //Compressor constants
     public static final int kZipArmForward = 0;
-    public static final int kZipArmReverse = 0;
-    public static final int kZipCompressorModule = 0; 
+    public static final int kZipArmReverse = 1;
+    public static final int kZipCompressorModule = 1; 
     public static final int kZipSolenoidModule = 0;
+    public static final int kZipSolenoidModule2 = 1;
     //Ty don't be mad at us this is all we have please.
     public static final boolean go = true;
     public static final boolean notGo = false;
     //Motor constants
-    public static final int kMotorPort = 0;
-    public static final double kSparkMaxRPM = 0.0;
+    public static final int kMotorPort = 18; //62?
+    public static final double kSparkMaxRPM = 2.0;
   }
 }
 

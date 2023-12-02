@@ -283,6 +283,11 @@ public class RobotContainer {
       m_zipMotor.notGo();
     }, m_zipMotor));
 
+    //TESTING
+    // m_controls.zipGoButton.onTrue(new InstantCommand(()->{
+    //   m_zipMotor.go();
+    // }, m_zipMotor));
+
 
     // TODO MAKE SURE THAT ELEVATOR IS RETRACTED HERE
     m_controls.homePresetButton.onTrue(new InstantCommand(()->{

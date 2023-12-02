@@ -20,7 +20,7 @@ public class ZipMotorSubsystem extends SubsystemBase {
 
 
   public void go(){
-    zipMotor.set(1.0);
+    zipMotor.set(5.0);
   }
 //changed references lmk if there are anymore
   public void notGo(){ 

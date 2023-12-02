@@ -15,15 +15,18 @@ public class ZipPneumaticsSubsystem extends SubsystemBase {
 
   public Compressor armCompressor = new Compressor(ZiplineConstants.kZipCompressorModule, PneumaticsModuleType.CTREPCM);
   public Solenoid zipExtender = new Solenoid(PneumaticsModuleType.CTREPCM,  ZiplineConstants.kZipSolenoidModule);
+  public Solenoid zipExtender2 = new Solenoid(PneumaticsModuleType.CTREPCM,  ZiplineConstants.kZipSolenoidModule2);
     /** Creates a new ExampleSubsystem. */
   public ZipPneumaticsSubsystem() {
     Retract();
   }
 
-  
+
 
 public void Extend() {
     zipExtender.set(ZiplineConstants.go);
+    zipExtender2.set(ZiplineConstants.go);
+
 }
 
 public boolean getExtended() {
@@ -32,10 +35,12 @@ public boolean getExtended() {
 
 public void Retract() {
     zipExtender.set(ZiplineConstants.notGo);
+    zipExtender2.set(ZiplineConstants.notGo);
 }
 
 public void toggle() {
     zipExtender.toggle();
+    zipExtender2.toggle();
 }
 
   /**
