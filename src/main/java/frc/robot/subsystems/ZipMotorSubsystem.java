@@ -14,7 +14,7 @@ import frc.robot.Constants.ZiplineConstants;
 
 public class ZipMotorSubsystem extends SubsystemBase {
 
-  CANSparkMax zipMotor = new CANSparkMax(ZiplineConstants.kMotorPort, MotorType.kBrushless);
+  CANSparkMax zipMotor = new CANSparkMax(ZiplineConstants.kMotorPort, MotorType.kBrushed);
   public double speed = 0.0;
   public boolean reversed = false;
   /** Creates a new ExampleSubsystem. */
