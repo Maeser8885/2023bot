@@ -19,7 +19,7 @@ public class Controls {
     // Replace with CommandPS4Controller or CommandJoystick if needed
     public final CommandXboxController m_secondaryDriverController =
             new CommandXboxController(Constants.OperatorConstants.kSecondaryDriverControllerPort);
-    public final CommandJoystick m_driverJoystick =
+    public final static CommandJoystick m_driverJoystick =
             new CommandJoystick(Constants.OperatorConstants.kDriverControllerPort);
 
     // Triggers!
@@ -46,7 +46,7 @@ public class Controls {
             
     public final Trigger armToggleButton =
             m_driverJoystick.button(4).and(m_driverJoystick.button(6));
-    public final Trigger zipGoButton =
+    public final static Trigger zipGoButton =
             m_driverJoystick.button(2);
     
     // Secondary Driver Control (LED AND MANUAL)
