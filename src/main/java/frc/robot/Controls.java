@@ -46,7 +46,7 @@ public class Controls {
             
     public final Trigger armToggleButton =
             m_driverJoystick.button(4).and(m_driverJoystick.button(6));
-    public final static Trigger zipGoButton =
+    public final Trigger zipGoButton =
             m_driverJoystick.button(2);
     
     // Secondary Driver Control (LED AND MANUAL)

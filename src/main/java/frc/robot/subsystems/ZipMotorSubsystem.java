@@ -14,17 +14,22 @@ import frc.robot.Constants.ZiplineConstants;
 public class ZipMotorSubsystem extends SubsystemBase {
 
   CANSparkMax zipMotor = new CANSparkMax(ZiplineConstants.kMotorPort, MotorType.kBrushless);
-
+  public double speed = 0.0;
+  public boolean reversed = false;
   /** Creates a new ExampleSubsystem. */
   public ZipMotorSubsystem() {}
 
 
   public void go(){
-    zipMotor.set(5.0);
+    speed = reversed ? -1.0 : 1.0;
   }
 //changed references lmk if there are anymore
   public void notGo(){ 
-    zipMotor.set(0.0);
+    speed = 0.0;
+  }
+
+  public void reverse(){
+    reversed = !reversed;
   }
 
   /**
@@ -53,6 +58,7 @@ public class ZipMotorSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    zipMotor.set(speed);
     // This method will be called once per scheduler run
   }
 

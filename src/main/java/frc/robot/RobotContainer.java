@@ -253,10 +253,10 @@ public class RobotContainer {
       m_dumbPivot.setPos(ArmPivot.kMidScoringPosition);
       m_armStatus = ArmStatuses.MID;
       },m_dumbPivot));
-    m_controls.highIntakePresetButton.onTrue(new InstantCommand(()->{
-      m_dumbPivot.setPos(ArmPivot.kHighIntakePosition);
-      m_armStatus = ArmStatuses.HIGH_INTAKE;
-      },m_dumbPivot));
+      //NOT HIGH INTAKE
+    m_controls.highIntakePresetButton.onTrue(new InstantCommand(()->{m_zipMotor.reverse();
+      },m_zipMotor));
+
     m_controls.intakePresetButton.onTrue(new InstantCommand(()->{
       if(m_elevator.getExtended()){
         m_elevator.Retract();

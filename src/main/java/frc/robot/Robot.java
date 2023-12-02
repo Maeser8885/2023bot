@@ -99,6 +99,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("yaw", m_robotContainer.m_driveSubsystem.navX.getAngle());
     SmartDashboard.putNumber("pitch", m_robotContainer.m_driveSubsystem.navX.getPitch());
     SmartDashboard.putNumber("roll", m_robotContainer.m_driveSubsystem.navX.getRoll());
+    
     /*SmartDashboard.putNumber("accelx", m_robotContainer.navX.getX);
     SmartDashboard.putNumber("accely", m_robotContainer.m_gyro.getAccelY());
     SmartDashboard.putNumber("accelz", m_robotContainer.m_gyro.getAccelZ());*/
