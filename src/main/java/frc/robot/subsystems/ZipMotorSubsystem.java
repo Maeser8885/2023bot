@@ -22,10 +22,12 @@ public class ZipMotorSubsystem extends SubsystemBase {
 
   public void go(){
     speed = reversed ? -1.0 : 1.0;
+    zipMotor.setVoltage(5.0);
   }
 //changed references lmk if there are anymore
   public void notGo(){ 
     speed = 0.0;
+    zipMotor.setVoltage(0);
   }
 
   public void reverse(){
@@ -59,6 +61,7 @@ public class ZipMotorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     zipMotor.set(speed);
+    
     // This method will be called once per scheduler run
   }
 
